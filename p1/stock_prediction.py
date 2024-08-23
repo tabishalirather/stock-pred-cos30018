@@ -15,7 +15,7 @@ np.random.seed(314)
 tf.random.set_seed(314)
 random.seed(314)
 
-
+# why shuffle: make the data more random. If the data is not shuffled, the model may be biased to the order of the data.
 def shuffle_in_unison(a, b):
     # shuffle two arrays in the same way
     state = np.random.get_state()
