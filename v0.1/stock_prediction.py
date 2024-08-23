@@ -2,7 +2,7 @@
 # Authors: Bao Vo and Cheong Koo
 # Date: 14/07/2021(v1); 19/07/2021 (v2); 02/07/2024 (v3)
 import os.path
-from get_data import read_data
+from get_data import get_data
 # Code modified from:
 # Title: Predicting Stock Prices with Python
 # Youtuble link: https://www.youtube.com/watch?v=PuZY9q-aKLw
@@ -49,7 +49,7 @@ import yfinance as yf
 # Get the data for the stock AAPL
 data = yf.download(COMPANY, TRAIN_START, TRAIN_END)
 
-test_data_new = read_data('CBA.AX', ['Open', 'Close', 'High', 'Low', 'Volume'], save_data=True, split_by_date=True, start_date=TRAIN_START, end_date=TRAIN_END)
+test_data_new = get_data('CBA.AX', ['Open', 'Close', 'High', 'Low', 'Volume'], save_data=True, split_by_date=True, start_date=TRAIN_START, end_date=TRAIN_END)
 print("test_data_new")
 print(test_data_new)
 print("test_data")

@@ -75,6 +75,7 @@ def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
 
     # add the target column (label) by shifting by `lookup_step`
     df['future'] = df['adjclose'].shift(-lookup_step)
+    # sequence_last_data = []
 
     # last `lookup_step` columns contains NaN in future column
     # get them before droping NaNs

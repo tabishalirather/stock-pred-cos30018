@@ -7,15 +7,21 @@ import datetime as dt
 import numpy as np
 import sklearn as sk
 from sklearn.preprocessing import MinMaxScaler
-
+import pandas as pd
 default_end_date = dt.datetime.now().strftime('%Y-%m-%d')
 default_start_date = (dt.datetime.now() - dt.timedelta(days=4 * 365)).strftime('%Y-%m-%d')
 
+def get_data(ticker, feature_columns, start_date=default_start_date, end_date=default_end_date, scale=True,
+             test_size=0.2, steps_to_predict=3, seq_train_length=50, save_data=False,
+             split_by_date=False):
+    print("I am read_data")
 
-def read_data(ticker, feature_columns, start_date=default_start_date, end_date=default_end_date, scale=True,
-              test_size=0.2, shuffle=False, steps_to_predict=3, seq_train_length=50, save_data=False,
-              split_by_date=False):
-    data_df = yf.download(ticker, start_date, end_date)
+
+    data_df = load_or_download(ticker, start_date, end_date)
+    missing_values_count = data_df.isna().sum()
+    print(missing_values_count)
+
+
     print(data_df)
     data_df.dropna(inplace=True)
     result = {'data': data_df.copy()}
@@ -73,11 +79,11 @@ def read_data(ticker, feature_columns, start_date=default_start_date, end_date=d
         result['y_train'] = y[:train_samples]
         result['X_test'] = x[train_samples:]
         result['y_test'] = y[train_samples:]
-        if shuffle:
-            pass
+        # if shuffle:
+        #     pass
     else:
         # split the dataset randomly
-        result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(x, y,test_size=test_size,shuffle=shuffle)
+        result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(x, y,test_size=test_size)
         dates = result["X_test"][:, -1, -1]
         # retrieve test features from the original dataframe
         result["test_df"] = result["df"].loc[dates]
@@ -92,15 +98,32 @@ def read_data(ticker, feature_columns, start_date=default_start_date, end_date=d
 
 
 
-
 def save_data_to_csv(data_df, ticker):
     #    Check if the folder 'data' exists, if not, create it
-    print("I am called")
+    print("save data to file fxn is being called")
     if not os.path.exists('data'):
         os.makedirs('data')
-
         # Save the DataFrame to a CSV file, overwriting if it exists
     data_df.to_csv(f"data/{ticker}.csv", index=False)
 
+def load_data(ticker):
+    if(not os.path.exists(f"data/{ticker}.csv")):
+        print("Data file does not exist, downloading it now from yfinance....")
+        return None
+    else:
+        data_df = pd.read_csv(f"data/{ticker}.csv")
+        return data_df
 
-read_data('TSLA', ['Open', 'Close', 'High', 'Low', 'Volume'], save_data=True, split_by_date=True)
+def load_or_download(ticker, start_date, end_date):
+    if (os.path.exists(f"data/{ticker}.csv")):
+        print("Data file already exists, loading it now....")
+        data_df = load_data(ticker)
+        return data_df
+    else:
+        print("Data file does not exist, downloading it now from yfinance....")
+        data_df = yf.download(ticker, start_date, end_date)
+        return data_df
+
+
+
+get_data('AMZN', ['Open', 'Close', 'High', 'Low', 'Volume'], save_data=True, split_by_date=True)
