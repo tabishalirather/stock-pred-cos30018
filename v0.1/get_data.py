@@ -20,6 +20,7 @@ default_start_date = (dt.datetime.now() - dt.timedelta(days=5 * 365)).strftime('
 def get_data(ticker, feature_columns, start_date=default_start_date, end_date=default_end_date, scale=True,
              test_size=0.2, steps_to_predict=3, seq_train_length=50, save_data=False,
              split_by_date=False):
+
     print("I am read_data")
 
     # load the data if it is saved already of download using yfinance.
@@ -27,9 +28,9 @@ def get_data(ticker, feature_columns, start_date=default_start_date, end_date=de
 
     # count the missing values in the data. In case there's a high number of missing values, investigate why and how to mitigate the effects
     missing_values_count = data_df.isna().sum()
-    print(missing_values_count)
+    # print(missing_values_count)
 
-    print(data_df)
+    # print(data_df)
     # drop nas
     data_df.dropna(inplace=True)
 
@@ -147,8 +148,8 @@ def get_data(ticker, feature_columns, start_date=default_start_date, end_date=de
         dates_X_test = result["X_test"][:, -1, -1]
 
         # Debug prints
-        print(f"Keys in result: {result.keys()}")
-        print(f"Dates extracted from X_test: {dates_X_test}")
+        # print(f"Keys in result: {result.keys()}")
+        # print(f"Dates extracted from X_test: {dates_X_test}")
 
         # Retrieve test features from the original dataframe using the extracted dates_X_test
         """
@@ -171,7 +172,7 @@ def get_data(ticker, feature_columns, start_date=default_start_date, end_date=de
         result["X_test"] = result["X_test"][:, :, :len(feature_columns)].astype(np.float32)
 
         # Debug print the result dictionary after processing
-        print(f"Result after processing: {result}")
+        # print(f"Result after processing: {result}")
 
     return data_df
 
@@ -189,14 +190,13 @@ def save_data_to_csv(data_df, ticker, start_date, end_date):
 
 def load_or_download(ticker, start_date, end_date):
     filename = ticker + '_' + start_date + '_' + end_date
-    if (os.path.exists(f"data/{filename}.csv")):
-        print("Data file already exists, loading it now....")
-        data_df = pd.read_csv(f"data/{filename}.csv")
-        return data_df
-    else:
-        print("Data file does not exist, downloading it now from yfinance....")
-        data_df = yf.download(ticker, start_date, end_date)
-        return data_df
+    # if (os.path.exists(f"data/{filename}.csv")):
+    #     print("Data file already exists, loading it now....")
+    #     data_df = pd.read_csv(f"data/{filename}.csv")
+    #     return data_df
+    # else:
+    print("Data file does not exist, downloading it now from yfinance....")
+    data_df = yf.download(ticker, start_date, end_date)
+    return data_df
 
 
-get_data('AMZN', ['Open', 'Close', 'High', 'Low', 'Volume'], save_data=True, split_by_date=False)
