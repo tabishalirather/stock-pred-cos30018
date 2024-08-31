@@ -18,14 +18,18 @@ import mplfinance as fplt
 import pandas as pd
 import os
 
+
+# sets ticker, feature columns, start date and end date to be passed as arguments to get_data function
 ticker = 'CBA.AX'
 feature_columns = ['Open', 'Close', 'High', 'Low', 'Volume']
 start_date = '2021-01-01'
 end_date = '2021-03-30'
 
+
+# get data from get_data function
 data_df = get_data(ticker, feature_columns, start_date, end_date, save_data=True, split_by_date=True)
 
-
+# define function to plot candlestick chart
 def plot_candlestick(data_df):
 	# data_df = data_df.set_index('Date')
 	print("Candlestick Chart Styling from MPLFinance : {}".format(fplt.available_styles()))
@@ -39,11 +43,14 @@ def plot_candlestick(data_df):
 	# print("I am RSI")
 	# print(data_df['RSI'])
 
+	# calculate simple moving average, relative strength index and exponential moving average for the given data using TA-Lib
 	data_df["SMA"] = talib.SMA(data_df.Close, timeperiod=trade_days_month)
 	data_df["RSI"] = talib.RSI(data_df.Close, timeperiod=trade_days_month)
 	data_df["EMA"] = talib.EMA(data_df.Close, timeperiod=trade_days_month)
 
 	print("TA-Lib Version : {}".format(talib.__version__))
+
+	# create candlestick chart with mplfinance
 	ema_plt = fplt.make_addplot(data_df["EMA"], color='red', width=1.2)
 	sma_plt = fplt.make_addplot(data_df["SMA"], color='blue', width=1.7)
 	sma_plt_scatter = fplt.make_addplot(data_df["SMA"], scatter=True, markersize=100, marker='^', color='green',
@@ -54,9 +61,12 @@ def plot_candlestick(data_df):
 	volume = fplt.make_addplot(data_df["Volume"], color="purple",
 	                           panel=1
 	                           )
+
+	# save the candlestick chart as an image in the images folder, create images folder if it doesn't exist
 	if not os.path.exists('images'):
 		os.makedirs('images')
 
+	# set the style of the candlestick chart
 	mc = fplt.make_marketcolors(
 		up='tab:blue', down='tab:red',
 		edge='lime',
@@ -64,10 +74,16 @@ def plot_candlestick(data_df):
 		volume='lawngreen',
 	)
 
+
+	# set the style of the candlestick chart
 	s = fplt.make_mpf_style(base_mpl_style="ggplot", marketcolors=mc)
 
+
+	# save the candlestick chart as an image in the images folder
 	savefig = dict(fname=f"images/{ticker}.png", dpi=1000, pad_inches=0.75)
 
+
+	# plot the candlestick chart
 	fplt.plot(
 		data_df,
 		type='candle',

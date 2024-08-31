@@ -133,7 +133,7 @@ def get_data(ticker, feature_columns, start_date=default_start_date, end_date=de
         train_samples = int((1 - test_size) * len(x))
         # print(f"result is {result}")
         # slices x from the beginning to the train_samples index and saves to X_train and same for y_train.
-        print("x[:train_samples] is ", x[:train_samples])
+        # print("x[:train_samples] is ", x[:train_samples])
         result['X_train'] = x[:train_samples]
         result['y_train'] = y[:train_samples]
         # slices x from the train_samples index to the end and saves to X_test and same for y_test.
@@ -192,7 +192,9 @@ def load_or_download(ticker, start_date, end_date):
     filename = ticker + '_' + start_date + '_' + end_date
     # if (os.path.exists(f"data/{filename}.csv")):
     #     print("Data file already exists, loading it now....")
+    # Fix loading data from system should work with plots as well.
     #     data_df = pd.read_csv(f"data/{filename}.csv")
+    #     data_df = data_df
     #     return data_df
     # else:
     print("Data file does not exist, downloading it now from yfinance....")
