@@ -37,7 +37,7 @@ end_date = '2021-03-30'
 data_df = get_data(ticker, feature_columns, start_date, end_date, save_data=True, split_by_date=True)
 
 # define function to plot candlestick chart
-def plot_candlestick(data_df):
+def plot_candlestick(data_df, num_days_aggreate=1):
 	# data_df = data_df.set_index('Date')
 	#
 	# print versions for talib and plotly, one for calculating technical indicators and the other for plotting the chart
@@ -46,31 +46,40 @@ def plot_candlestick(data_df):
 
 	# sets number of days to calculate sma, rsi and ema for.
 	trade_days_month = 10
-	data_df["SMA"] = talib.SMA(data_df.Close, timeperiod=trade_days_month)
-	data_df["RSI"] = talib.RSI(data_df.Close, timeperiod=trade_days_month)
-	data_df["EMA"] = talib.EMA(data_df.Close, timeperiod=trade_days_month)
+
+	# resample the data to aggregate it for given number of days and choose the first, max, min and last values for open, high, low and close respectively.
+	resampled_data = data_df.resample(f"{num_days_aggreate}D").agg({
+		'Open': 'first',
+		'High': 'max',
+		'Low': 'min',
+		'Close': 'last',
+		'Volume': 'sum'
+	}).dropna()
+	resampled_data["SMA"] = talib.SMA(resampled_data.Close, timeperiod=trade_days_month)
+	resampled_data["RSI"] = talib.RSI(resampled_data.Close, timeperiod=trade_days_month)
+	resampled_data["EMA"] = talib.EMA(resampled_data.Close, timeperiod=trade_days_month)
 	# print("I should be printed here")
 	# print(f"data_df.index: {data_df.index}")
 
 	# create candlestick chart with plotly
 	candlestick = go.Candlestick(
-		x=data_df.index,
-		open=data_df['Open'],
-		high=data_df['High'],
-		low=data_df['Low'],
-		close=data_df['Close']
+		x=resampled_data.index,
+		open=resampled_data['Open'],
+		high=resampled_data['High'],
+		low=resampled_data['Low'],
+		close=resampled_data['Close']
 	)
 	# create sma and ema lines
 	sma = go.Scatter(
-		x=data_df.index,
-		y=data_df["SMA"],
+		x=resampled_data.index,
+		y=resampled_data["SMA"],
 		# mode='lines',
 		yaxis='y1',
 		name='SMA'
 	)
 	ema = go.Scatter(
-		x=data_df.index,
-		y=data_df["EMA"],
+		x=resampled_data.index,
+		y=resampled_data["EMA"],
 		# mode='lines',
 		yaxis='y1',
 		name='EMA'
@@ -91,7 +100,29 @@ def plot_candlestick(data_df):
 
 	# show the chart
 	fig.show()
+
+	# let's implement aggregation of data for candlestick chart.
+	# we will aggregate data for a number of days and plot the candlestick chart.
+	# resampled_data = data_df.resample(f"{num_days_aggreate}D").agg({
+	# 	'Open': 'first',
+	# 	'High': 'max',
+	# 	'Low': 'min',
+	# 	'Close': 'last',
+	# 	'Volume': 'sum'
+	# }).dropna()
+
+	# candlestick_agg = go.Candlestick(
+	# 	x=resampled_data.index,
+	# 	open=data_df['Open'],
+	# 	high=data_df['High'],
+	# 	low=data_df['Low'],
+	# 	close=data_df['Close']
+	# )
+
+	# fig = go.Figure(data=[candlestick_agg])
+	# fig.show()
 	# fig.write_html("candlestick_chart.html")
+
 
 
 plot_candlestick(data_df)
