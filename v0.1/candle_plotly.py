@@ -99,29 +99,10 @@ def plot_candlestick(data_df, num_days_aggreate=1):
 	print("After fig.update_layout")
 
 	# show the chart
+	# fig.write_image("candlestick.html")
+
 	fig.show()
 
-	# let's implement aggregation of data for candlestick chart.
-	# we will aggregate data for a number of days and plot the candlestick chart.
-	# resampled_data = data_df.resample(f"{num_days_aggreate}D").agg({
-	# 	'Open': 'first',
-	# 	'High': 'max',
-	# 	'Low': 'min',
-	# 	'Close': 'last',
-	# 	'Volume': 'sum'
-	# }).dropna()
-
-	# candlestick_agg = go.Candlestick(
-	# 	x=resampled_data.index,
-	# 	open=data_df['Open'],
-	# 	high=data_df['High'],
-	# 	low=data_df['Low'],
-	# 	close=data_df['Close']
-	# )
-
-	# fig = go.Figure(data=[candlestick_agg])
-	# fig.show()
-	# fig.write_html("candlestick_chart.html")
 
 
 
