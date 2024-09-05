@@ -53,14 +53,11 @@ def plot_candlestick(data_df):
 	# create candlestick chart with mplfinance
 	ema_plt = fplt.make_addplot(data_df["EMA"], color='red', width=1.2)
 	sma_plt = fplt.make_addplot(data_df["SMA"], color='blue', width=1.7)
-	sma_plt_scatter = fplt.make_addplot(data_df["SMA"], scatter=True, markersize=100, marker='^', color='green',
-	                                    alpha=0.5)
+	sma_plt_scatter = fplt.make_addplot(data_df["SMA"], scatter=True, markersize=100, marker='^', color='green',alpha=0.5)
 
 	rsi_plt = fplt.make_addplot(data_df["RSI"], color="grey", width=1.5, ylabel="RSI",
 	                            secondary_y=True, linestyle='dashdot')
-	volume = fplt.make_addplot(data_df["Volume"], color="purple",
-	                           panel=1
-	                           )
+	volume = fplt.make_addplot(data_df["Volume"], color="purple",)
 
 	# save the candlestick chart as an image in the images folder, create images folder if it doesn't exist
 	if not os.path.exists('images'):
@@ -89,6 +86,7 @@ def plot_candlestick(data_df):
 		type='candle',
 		#  Add extra plots on top of main candle stick chart. These are technical indicators.
 		addplot=[sma_plt, sma_plt_scatter, ema_plt, rsi_plt, volume],
+
 		style=s,
 		title=ticker,
 		ylabel='Price($)',

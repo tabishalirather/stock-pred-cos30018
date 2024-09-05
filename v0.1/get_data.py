@@ -20,7 +20,6 @@ default_start_date = (dt.datetime.now() - dt.timedelta(days=5 * 365)).strftime('
 def get_data(ticker, feature_columns, start_date=default_start_date, end_date=default_end_date, scale=True,
              test_size=0.2, steps_to_predict=3, seq_train_length=50, save_data=False,
              split_by_date=False):
-
     print("I am read_data")
 
     # load the data if it is saved already of download using yfinance.
@@ -199,6 +198,13 @@ def load_or_download(ticker, start_date, end_date):
     # else:
     print("Data file does not exist, downloading it now from yfinance....")
     data_df = yf.download(ticker, start_date, end_date)
+    print(data_df.head())
+    print(data_df.tail())
     return data_df
 
 
+
+
+
+
+get_data("AAPL", ['Open', 'High', 'Low', 'Close', 'Volume'], scale=True, save_data=True, split_by_date=True, start_date = "2016-02-03", end_date = "2017-01-16")

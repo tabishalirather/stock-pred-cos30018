@@ -55,9 +55,14 @@ def plot_candlestick(data_df, num_days_aggreate=1):
 		'Close': 'last',
 		'Volume': 'sum'
 	}).dropna()
+
 	resampled_data["SMA"] = talib.SMA(resampled_data.Close, timeperiod=trade_days_month)
 	resampled_data["RSI"] = talib.RSI(resampled_data.Close, timeperiod=trade_days_month)
 	resampled_data["EMA"] = talib.EMA(resampled_data.Close, timeperiod=trade_days_month)
+
+	resampled_data["RSI"] = (resampled_data["RSI"] - resampled_data["RSI"].min()) / (
+				resampled_data["RSI"].max() - resampled_data["RSI"].min())
+
 	# print("I should be printed here")
 	# print(f"data_df.index: {data_df.index}")
 
@@ -74,7 +79,7 @@ def plot_candlestick(data_df, num_days_aggreate=1):
 		x=resampled_data.index,
 		y=resampled_data["SMA"],
 		# mode='lines',
-		yaxis='y1',
+		yaxis='y2',
 		name='SMA'
 	)
 	ema = go.Scatter(
@@ -84,20 +89,39 @@ def plot_candlestick(data_df, num_days_aggreate=1):
 		yaxis='y1',
 		name='EMA'
 	)
+	rsi = go.Scatter(
+		x=resampled_data.index,
+		y=resampled_data["RSI"],
+		# mode='lines',
+		yaxis='y1',
+		name='RSI'
+	)
 
 	# set title for the chart
 	title = f"{ticker + start_date + end_date}"
 	print("Before go.Figure")
 
 	# create figure with candlestick, sma and ema
-	fig = go.Figure(data=[candlestick, sma, ema])
+	fig = go.Figure(data=[candlestick, sma, ema, rsi])
 	# to turn of slider use , xaxis_rangeslider_visible = False
 	# print("Before fig.update_layoutm, after go.Figure")
 
 	# update layout of the figure
-	fig.update_layout(width=800, height=800, title=title, xaxis_title="Date", yaxis_title="Price")
 	print("After fig.update_layout")
 
+	fig.update_layout(
+		width=800,
+		height=800,
+		title=title,
+		xaxis_title="Date",
+		yaxis_title="Price",
+		yaxis2=dict(
+			title="Y_2",
+			overlaying='y',
+			side='right',
+			position=0.1
+		)
+	)
 	# show the chart
 	# fig.write_image("candlestick.html")
 

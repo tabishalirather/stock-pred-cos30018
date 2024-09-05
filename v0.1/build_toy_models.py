@@ -2,7 +2,7 @@
 import random
 from create_model import create_model
 from tensorflow.keras.layers import LSTM, GRU, SimpleRNN
-from tensorflow.keras import backend as k
+# from tensorflow.keras import backend as k
 
 
 
@@ -37,16 +37,22 @@ def rand_parameters():
 	return [num_layers, units_per_layer, layer_name, num_time_steps, number_of_features, activation, loss, optimizer, metrics]
 
 
-num_of_models = random.randint(3, 10)
+
+
+
+def build_toy_models(num_of_models):
+	list_of_models = []
+	for model in range (num_of_models):
+
+		[num_layers, units_per_layer, layer_name, num_time_steps, number_of_features, activation, loss, optimizer, metrics] = rand_parameters()
+		# k.clear_session()  # Clear the session to reset layer naming
+
+		dl_model = create_model(num_layers, units_per_layer, layer_name, num_time_steps, number_of_features, activation, loss, optimizer, metrics)
+		list_of_models.append(dl_model)
+	return list_of_models
+
+num_of_models = random.randint(1, 3)
 print(num_of_models)
-list_of_models = []
-index = 0
-for model in range (num_of_models):
+model_list = build_toy_models(num_of_models)
 
-	[num_layers, units_per_layer, layer_name, num_time_steps, number_of_features, activation, loss, optimizer, metrics] = rand_parameters()
-	# k.clear_session()  # Clear the session to reset layer naming
-
-	dl_model = create_model(num_layers, units_per_layer, layer_name, num_time_steps, number_of_features, activation, loss, optimizer, metrics)
-	list_of_models.append(dl_model)
-
-[model.summary() for model in list_of_models]
+[model.summary() for model in model_list]

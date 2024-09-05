@@ -1,5 +1,5 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, GRU, SimpleRNN, Dense, Dropout, Bidirectional
+from tensorflow.keras.layers import LSTM, GRU, SimpleRNN, Dense, Dropout
 
 import tensorflow as tf
 # optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=0.001)
@@ -61,7 +61,7 @@ def create_model(num_layers = 4, units_per_layer = 256, layer_name = LSTM , num_
 	dl_model.add(Dense(1, activation=activation))
 	# compile the model with given loss function, optimizer and metrics. loss is the fxn to be minimised, i.e the goal for dl_model is to minimise the loss. optimizer is the algorithm to be used to minimise the loss. metrics is the fxn to be used to evaluate/track the model; often same as loss. .
 	dl_model.compile(loss=loss, optimizer=optimizer, metrics=[metrics])
-	print(dl_model.summary())
+	# print(dl_model.summary())
 	return dl_model
 
 
