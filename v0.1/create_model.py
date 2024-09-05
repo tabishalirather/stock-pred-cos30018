@@ -9,6 +9,7 @@ import tensorflow as tf
 # number_of_features is the number of columns in the time series data
 def create_model(num_layers = 4, units_per_layer = 256, layer_name = LSTM , num_time_steps = 20, number_of_features=5, activation="ReLU", loss="mean_absolute_error", optimizer="rmsprop", metrics="mean_absolute_error"):
 	print("Lock and load")
+	# sequential allows us to stack layers on top of each other
 	dl_model = Sequential()
 	for layer in range(num_layers):
 		# first layer, specify the shape of the input data, batch size for weight updation, num of steps to consider and number of features to expect.
@@ -42,10 +43,12 @@ def create_model(num_layers = 4, units_per_layer = 256, layer_name = LSTM , num_
 			How They Work Together:
 				Sequence Length (5): Determines how much "history" the model looks at to make a prediction. In this case, 5 days of stock data.
 				Batch Size (32): Determines how many sequences are processed together before the model updates its weights. In this case, 32 sequences, each 5 days long, are processed in one batch.
+				Currently, batch size set to none, so that we can dynamically change the batch size.
 			'''
 			dl_model.add(layer_name(units_per_layer, batch_input_shape=(None, num_time_steps, number_of_features), return_sequences=True))
-		# 	last layer, reutrn sequences is false cuz we not stacking anymore.
+
 		elif (layer == num_layers - 1):
+			# 	last layer, reutrn sequences is false cuz we not stacking anymore.
 			dl_model.add(layer_name(units_per_layer, return_sequences=False))
 		else:
 			# hidden layers return sequences so that we can stack lstm layers on top of each other
