@@ -8,20 +8,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1f2b4f63-e6be-48f7-87fc-0cb7953c9d36" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/v0.1/data/AAPL_2010-01-01_2013-01-01.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/v0.1/data/AAPL_2016-02-03_2017-01-16.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/v0.1/data/AAPL_2020-01-01_2021-01-01.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/v0.1/multi_var_step_pred.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v0.1/boxplot.py" beforeDir="false" afterPath="$PROJECT_DIR$/v0.1/boxplot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v0.1/build_toy_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/v0.1/build_toy_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v0.1/candle_mplfinance.py" beforeDir="false" afterPath="$PROJECT_DIR$/v0.1/candle_mplfinance.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v0.1/candle_plotly.py" beforeDir="false" afterPath="$PROJECT_DIR$/v0.1/candle_plotly.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v0.1/create_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/v0.1/create_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v0.1/data/CBA.AX_2021-01-01_2021-02-06.csv" beforeDir="false" afterPath="$PROJECT_DIR$/v0.1/data/CBA.AX_2021-01-01_2021-02-06.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v0.1/data/CBA.AX_2021-01-01_2021-03-30.csv" beforeDir="false" afterPath="$PROJECT_DIR$/v0.1/data/CBA.AX_2021-01-01_2021-03-30.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v0.1/get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/v0.1/get_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v0.1/images/CBA.AX.png" beforeDir="false" afterPath="$PROJECT_DIR$/v0.1/images/CBA.AX.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/v0.1/images/boxplot.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/v0.1/images/boxplot.pdf" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,47 +49,47 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;MATLAB_INTERPRETER&quot;: &quot;V:\\MATLAB\\R2024a\\bin\\matlab.exe&quot;,
-    &quot;Python.boxplot.executor&quot;: &quot;Run&quot;,
-    &quot;Python.build_toy_models.executor&quot;: &quot;Run&quot;,
-    &quot;Python.candle_mplfinance.executor&quot;: &quot;Run&quot;,
-    &quot;Python.candle_plotly.executor&quot;: &quot;Run&quot;,
-    &quot;Python.create_model.executor&quot;: &quot;Run&quot;,
-    &quot;Python.get_data (2).executor&quot;: &quot;Run&quot;,
-    &quot;Python.get_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.parameters.executor&quot;: &quot;Run&quot;,
-    &quot;Python.return_dl.executor&quot;: &quot;Run&quot;,
-    &quot;Python.shuffle_example.executor&quot;: &quot;Run&quot;,
-    &quot;Python.stock_prediction.executor&quot;: &quot;Run&quot;,
-    &quot;Python.train.executor&quot;: &quot;Run&quot;,
-    &quot;Python.viz_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.viz_data_mplfinance.executor&quot;: &quot;Run&quot;,
-    &quot;Python.viz_data_plotly.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;v0.1&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/tabis/OneDrive - Swinburne University/Coursework/2024 Semester II/COS30018 Intelligent Systems/Week 5&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;aDefault&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.editor&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "MATLAB_INTERPRETER": "V:\\MATLAB\\R2024a\\bin\\matlab.exe",
+    "Python.boxplot.executor": "Run",
+    "Python.build_toy_models.executor": "Run",
+    "Python.candle_mplfinance.executor": "Run",
+    "Python.candle_plotly.executor": "Run",
+    "Python.create_model.executor": "Run",
+    "Python.get_data (2).executor": "Run",
+    "Python.get_data.executor": "Run",
+    "Python.parameters.executor": "Run",
+    "Python.return_dl.executor": "Run",
+    "Python.shuffle_example.executor": "Run",
+    "Python.stock_prediction.executor": "Run",
+    "Python.train.executor": "Run",
+    "Python.viz_data.executor": "Run",
+    "Python.viz_data_mplfinance.executor": "Run",
+    "Python.viz_data_plotly.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "v0.1",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/tabis/OneDrive - Swinburne University/Coursework/2024 Semester II/COS30018 Intelligent Systems/Week 5",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "aDefault",
+    "settings.editor.selected.configurable": "preferences.keymap",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\stock-pred-project\v0.1" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.candle_mplfinance">
     <configuration default="true" type="MatlabApplication">
       <option name="FILE_PATH" value="" />
       <option name="INTERPRETER_PATH" value="" />
@@ -234,7 +222,9 @@
       <workItem from="1725428671303" duration="352000" />
       <workItem from="1725430235289" duration="3187000" />
       <workItem from="1725502974306" duration="2647000" />
-      <workItem from="1725513510469" duration="7446000" />
+      <workItem from="1725513510469" duration="7513000" />
+      <workItem from="1725533948642" duration="87000" />
+      <workItem from="1725593280380" duration="382000" />
     </task>
     <servers />
   </component>
