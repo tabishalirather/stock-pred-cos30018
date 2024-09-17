@@ -2,6 +2,9 @@
 # Authors: Bao Vo and Cheong Koo
 # Date: 14/07/2021(v1); 19/07/2021 (v2); 02/07/2024 (v3)
 import os.path
+
+from pyexpat import features
+
 from get_data import get_data
 # Code modified from:
 # Title: Predicting Stock Prices with Python
@@ -48,8 +51,10 @@ import yfinance as yf
 
 # Get the data for the stock AAPL
 data = yf.download(COMPANY, TRAIN_START, TRAIN_END)
+feature_columns = ['Open', 'Close', 'High', 'Low', 'Volume']
+test_data_new = get_data(COMPANY, feature_columns, save_data=True, split_by_date=True, start_date=TRAIN_START, end_date=TRAIN_END)
 
-test_data_new = get_data('CBA.AX', ['Open', 'Close', 'High', 'Low', 'Volume'], save_data=True, split_by_date=True, start_date=TRAIN_START, end_date=TRAIN_END)
+
 print("test_data_new")
 print(test_data_new)
 print("test_data")
@@ -64,11 +69,11 @@ print(data)
 # 3) Change the Prediction days
 # ------------------------------------------------------------------------------
 CLOSING_PRICE = "Close"
-
+features_cols = feature_columns
 scaler = MinMaxScaler(feature_range=(0, 1))  # scale all the values from min to max to 0 to 1
 # Note that, by default, feature_range=(0, 1). Thus, if you want a different 
 # feature_range (min,max) then you'll need to specify it here
-scaled_data = scaler.fit_transform(data[CLOSING_PRICE].values.reshape(-1,
+scaled_data = scaler.fit_transform(data[features_cols].values.reshape(-1,
                                                                       1))  # extrarcts values of closing price and reshapes it to 2D array cuz the scaler needs 2d array as input
 
 # Flatten and normalise the data, -1 means unknown dimensions, and numpy is gotta figure it out.
@@ -88,11 +93,12 @@ scaled_data = scaler.fit_transform(data[CLOSING_PRICE].values.reshape(-1,
 
 # Number of days to look back to base the prediction
 PREDICTION_DAYS = 60  # Original
-if (os.path.exists("v0.1.h5")):
-    print("Model exists")
-    # Load the model
-    model = tf.keras.models.load_model("v0.1.h5")
-else:
+# if (os.path.exists("v0.1.h5")):
+#     print("Model exists")
+#     # Load the model
+#     model = tf.keras.models.load_model("v0.1.h5")
+# else:
+if(1 == 1):
     # To store the training data
     x_train = []
     y_train = []

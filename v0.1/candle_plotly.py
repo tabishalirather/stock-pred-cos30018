@@ -30,7 +30,7 @@ pio.renderers.default = "browser"
 ticker = 'CBA.AX'
 feature_columns = ['Open', 'Close', 'High', 'Low', 'Volume']
 start_date = '2021-01-01'
-end_date = '2021-03-30'
+end_date = '2010-01-01'
 
 
 # get data from get_data function
