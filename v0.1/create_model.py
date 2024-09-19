@@ -7,7 +7,7 @@ import tensorflow as tf
 
 # num_time_steps in time series in number of rows(time points) to consider.
 # number_of_features is the number of columns in the time series data
-def create_model(num_layers = 4, units_per_layer = 256, layer_name = LSTM , num_time_steps = 20, number_of_features=5, activation="ReLU", loss="mean_absolute_error", optimizer="rmsprop", metrics="mean_absolute_error"):
+def create_model(num_layers, units_per_layer, layer_name, num_time_steps, number_of_features=5, activation="tanh", loss="mean_absolute_error", optimizer="rmsprop", metrics="mean_absolute_error"):
 	print("Lock and load")
 	# sequential allows us to stack layers on top of each other
 	dl_model = Sequential()
@@ -56,9 +56,9 @@ def create_model(num_layers = 4, units_per_layer = 256, layer_name = LSTM , num_
 
 
 	# add dropout after each layer, which kicks out 20% of the neurons randomly to prevent overfitting
-	dl_model.add(Dropout(0.2))
+		dl_model.add(Dropout(0.2))
 	# output layer, fully connected, 1 neuron layer for prediction value.
-	dl_model.add(Dense(1, activation=activation))
+	dl_model.add(Dense(1, activation='tanh'))
 	# compile the model with given loss function, optimizer and metrics. loss is the fxn to be minimised, i.e the goal for dl_model is to minimise the loss. optimizer is the algorithm to be used to minimise the loss. metrics is the fxn to be used to evaluate/track the model; often same as loss. .
 	dl_model.compile(loss=loss, optimizer=optimizer, metrics=[metrics])
 	# print(dl_model.summary())

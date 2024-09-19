@@ -53,6 +53,8 @@ def build_toy_models(num_of_models):
 
 num_of_models = random.randint(1, 3)
 print(num_of_models)
-model_list = build_toy_models(num_of_models)
+# model_list = build_toy_models(num_of_models)
 
-[model.summary() for model in model_list]
+# [model.summary() for model in model_list]
+
+dl_model = create_model(4, 256, LSTM, 20, 5, "ReLU", "mean_absolute_error", "rmsprop", "mean_absolute_error")

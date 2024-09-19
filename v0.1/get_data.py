@@ -17,14 +17,14 @@ default_end_date = dt.datetime.now().strftime('%Y-%m-%d')
 default_start_date = (dt.datetime.now() - dt.timedelta(days=5 * 365)).strftime('%Y-%m-%d')
 
 
-def get_data(ticker, feature_columns, start_date=default_start_date, end_date=default_end_date, scale=True,
-             test_size=0.2, steps_to_predict=3, seq_train_length=50, save_data=False,
+def get_data(ticker, feature_columns, start_date, end_date,  seq_train_length, scale=True,
+             test_size=0.2, steps_to_predict=3, save_data=False,
              split_by_date=False):
     print("I am read_data")
 
     # load the data if it is saved already of download using yfinance.
-    data_df = load_or_download(ticker, start_date, end_date)
-
+    # data_df = load_or_download(ticker, start_date, end_date)
+    data_df = yf.download(ticker, start_date, end_date)
     # count the missing values in the data. In case there's a high number of missing values, investigate why and how to mitigate the effects
     missing_values_count = data_df.isna().sum()
     # print(missing_values_count)
@@ -129,6 +129,7 @@ def get_data(ticker, feature_columns, start_date=default_start_date, end_date=de
 
     # now we split the data into training and testing sets by date if the user has selected the option.
     if split_by_date:
+        print("Splitting by date")
         train_samples = int((1 - test_size) * len(x))
         # print(f"result is {result}")
         # slices x from the beginning to the train_samples index and saves to X_train and same for y_train.
@@ -140,6 +141,7 @@ def get_data(ticker, feature_columns, start_date=default_start_date, end_date=de
         result['y_test'] = y[train_samples:]
     else:
         # Split the dataset randomly using train_test_split from scikit-learn.
+        print("calling train_test_split")
         result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(
             x, y, test_size=test_size)
 
@@ -167,13 +169,22 @@ def get_data(ticker, feature_columns, start_date=default_start_date, end_date=de
         result["test_df"] = result["test_df"][~result["test_df"].index.duplicated(keep='first')]
 
         # slice the result list to get only the feature columns and convert to float32 and stored them as X_train and X_test
+        print("Original way:")
         result["X_train"] = result["X_train"][:, :, :len(feature_columns)].astype(np.float32)
+        print(result["X_train"])
+
+
+        print("New way:")
+        result["X_train"] = result["X_train"].astype(np.float32)
+        print(result["X_train"])
+
+
         result["X_test"] = result["X_test"][:, :, :len(feature_columns)].astype(np.float32)
 
         # Debug print the result dictionary after processing
         # print(f"Result after processing: {result}")
 
-    return data_df
+    return [data_df, result]
 
 
 def save_data_to_csv(data_df, ticker, start_date, end_date):
@@ -187,24 +198,24 @@ def save_data_to_csv(data_df, ticker, start_date, end_date):
     data_df.to_csv(f"data/{filename}.csv", index=False)
 
 
-def load_or_download(ticker, start_date, end_date):
-    filename = ticker + '_' + start_date + '_' + end_date
-    # if (os.path.exists(f"data/{filename}.csv")):
-    #     print("Data file already exists, loading it now....")
-    # Fix loading data from system should work with plots as well.
-    #     data_df = pd.read_csv(f"data/{filename}.csv")
-    #     data_df = data_df
-    #     return data_df
-    # else:
-    print("Data file does not exist, downloading it now from yfinance....")
-    data_df = yf.download(ticker, start_date, end_date)
-    print(data_df.head())
-    print(data_df.tail())
-    return data_df
+# def load_or_download(ticker, start_date, end_date):
+#     filename = ticker + '_' + start_date + '_' + end_date
+#     # if (os.path.exists(f"data/{filename}.csv")):
+#     #     print("Data file already exists, loading it now....")
+#     # Fix loading data from system should work with plots as well.
+#     #     data_df = pd.read_csv(f"data/{filename}.csv")
+#     #     data_df = data_df
+#     #     return data_df
+#     # else:
+#     print("Data file does not exist, downloading it now from yfinance....")
+#     data_df = yf.download(ticker, start_date, end_date)
+#     print(data_df.head())
+#     print(data_df.tail())
+#     return data_df
 
 
 
 
 
 
-get_data("AAPL", ['Open', 'High', 'Low', 'Close', 'Volume'], scale=True, save_data=True, split_by_date=True, start_date = "2016-02-03", end_date = "2017-01-16")
+# get_data("AAPL", ['Open', 'High', 'Low', 'Close', 'Volume'], scale=True, save_data=True, split_by_date=True, start_date, end_date = "2017-01-16")

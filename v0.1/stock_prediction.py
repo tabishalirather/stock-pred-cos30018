@@ -41,7 +41,7 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM, InputLayer  # importin
 # DATA_SOURCE = "yahoo"
 COMPANY = 'CBA.AX'  # Company to read
 
-TRAIN_START = '2020-01-01'  # Start date to read
+TRAIN_START = '2022-01-01'  # Start date to read
 TRAIN_END = '2023-08-01'  # End date to read
 DATA_SOURCE = 'yahoo'
 # data = web.DataReader(COMPANY, DATA_SOURCE, TRAIN_START, TRAIN_END) # Read data using yahoo
@@ -73,8 +73,17 @@ features_cols = feature_columns
 scaler = MinMaxScaler(feature_range=(0, 1))  # scale all the values from min to max to 0 to 1
 # Note that, by default, feature_range=(0, 1). Thus, if you want a different 
 # feature_range (min,max) then you'll need to specify it here
-scaled_data = scaler.fit_transform(data[features_cols].values.reshape(-1,
-                                                                      1))  # extrarcts values of closing price and reshapes it to 2D array cuz the scaler needs 2d array as input
+# scaled_data = scaler.fit_transform(data[features_cols].values.reshape(-1, 1))
+scaled_data = []
+for feature in features_cols:
+    # for index in range(len(data[feature_columns[feature]])):
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    scaled_feature = scaler.fit_transform(data[feature].values.reshape(-1, 1))
+    scaled_data.append(scaled_feature)
+
+scaled_data = np.hstack(scaled_data)
+# feature_columns = ['Open', 'Close', 'High', 'Low', 'Volume']
+# extrarcts values of closing price and reshapes it to 2D array cuz the scaler needs 2d array as input
 
 # Flatten and normalise the data, -1 means unknown dimensions, and numpy is gotta figure it out.
 # First, we reshape a 1D array(n) to 2D array(n,1)
@@ -204,7 +213,7 @@ if(1 == 1):
 
     # Now we are going to train this model with our training data
     # (x_train, y_train)
-    model.fit(x_train, y_train, epochs=25, batch_size=32)
+    model.fit(x_train, y_train, epochs=20, batch_size=100)
     # look at 32 samples at once, and aggregate their errors and do this 25 times to get an average value.
 
 
@@ -228,11 +237,13 @@ if(1 == 1):
     # in the future, when you want to make the prediction, you only need to load
     # your pre-trained model and run it on the new input for which the prediction
     # need to be made.
-    model.save("v0.1.h5")
+    model.save("v0.1.keras")
 # ------------------------------------------------------------------------------
 # Test the model accuracy on existing data
 # ------------------------------------------------------------------------------
 # Load the test data
+
+print("I am here")
 TEST_START = '2023-08-02'
 TEST_END = '2024-07-02'
 
@@ -285,8 +296,10 @@ x_test = np.array(x_test)
 x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
 # TO DO: Explain the above 5 lines
 # we prepare the test data to be used by model just like we did for training data, we reshape it to 3d array. of shape (numer of inputs, number of time steps, number of features per time step.)
-saved_model = tf.keras.models.load_model("v0.1.h5")
+print("before saved_model")
+saved_model = tf.keras.models.load_model("v0.1.keras")
 predicted_prices = saved_model.predict(x_test)
+print("Between predidcted prices")
 predicted_prices = scaler.inverse_transform(predicted_prices)
 # Clearly, as we transform our data into the normalized range (0,1),
 # we now need to reverse this transformation 
@@ -297,7 +310,7 @@ predicted_prices = scaler.inverse_transform(predicted_prices)
 # 2) Chart showing High & Lows of the day
 # 3) Show chart of next few days (predicted)
 # ------------------------------------------------------------------------------
-
+print("Before graphing")
 import plotly.graph_objects as go
 from datetime import datetime
 next_day = test_data.index[-1] + pd.Timedelta(days=1)
@@ -306,6 +319,7 @@ fig = go.Figure(data=[
     go.Candlestick(x=test_data.index, open=test_data['Open'], high=test_data['High'], low=test_data['Low'],
                    close=test_data['Close'])])
 # // add code to plot for whole 60 days.
+print("Between fo.figure and add_trace")
 fig.add_trace(go.Scatter(
     x=test_data.index,
     y=predicted_prices.flatten(),
@@ -314,15 +328,17 @@ fig.add_trace(go.Scatter(
     line=dict(color='blue', dash='dash')
 ))
 
+print("Between add_trace and update_layout")
+# fig.update_layout(xaxis_rangeslider_visible=True)
+# fig.show()
 
-fig.update_layout(xaxis_rangeslider_visible=True)
-fig.show()
-
+print("After update_layout")
 plt.plot(actual_prices, color="black", label=f"Actual {COMPANY} Price")
 plt.plot(predicted_prices, color="green", label=f"Predicted {COMPANY} Price")
 plt.title(f"{COMPANY} Share Price")
 plt.xlabel("Time")
 plt.ylabel(f"{COMPANY} Share Price")
+print("Before plt.legend")
 plt.legend()
 plt.show()
 
@@ -330,7 +346,7 @@ plt.show()
 # Predict next day
 # ------------------------------------------------------------------------------
 
-
+print("Before real_data")
 real_data = [model_inputs[len(model_inputs) - PREDICTION_DAYS:, 0]]
 real_data = np.array(real_data)
 real_data = np.reshape(real_data, (real_data.shape[0], real_data.shape[1], 1))
@@ -338,7 +354,8 @@ real_data = np.reshape(real_data, (real_data.shape[0], real_data.shape[1], 1))
 prediction = model.predict(real_data)
 prediction = scaler.inverse_transform(prediction)
 print(f"Prediction: {prediction}")
-
+print(f"Actual: {actual_prices[-1]}")
+print("After prediciton")
 # A few concluding remarks here:
 # 1. The predictor is quite bad, especially if you look at the next day 
 # prediction, it missed the actual price by about 10%-13%
@@ -354,10 +371,10 @@ print(f"Prediction: {prediction}")
 # https://github.com/jason887/Using-Deep-Learning-Neural-Networks-and-Candlestick-Chart-Representation-to-Predict-Stock-Market
 # Can you combine these different techniques for a better prediction??
 
-from yahoo_fin import stock_info as si
-
-
-def read_data(ticker, feature_columns, start_date, end_date, scale=True, test_size = 0.2, shuffle = False):
-    data_df = si.get_data(ticker, start_date, end_date)
-    print(data_df)
+# from yahoo_fin import stock_info as si
+#
+#
+# def read_data(ticker, feature_columns, start_date, end_date, scale=True, test_size = 0.2, shuffle = False):
+#     data_df = si.get_data(ticker, start_date, end_date)
+#     print(data_df)
 
