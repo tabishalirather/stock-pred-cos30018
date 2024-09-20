@@ -73,14 +73,17 @@ import yfinance as yf
 # data = yf.download(COMPANY, TRAIN_START, TRAIN_END)
 # feature_columns = ['Open', 'Close', 'High', 'Low', 'Volume']
 feature_columns = ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
+PREDICTION_DAYS = 20
+target_column = 'Close'  # We are predicting the 'Close' price
 d_r = get_data(COMPANY, feature_columns, save_data=False, split_by_date=False, start_date=TRAIN_START,
-                end_date=TRAIN_END)
+                end_date=TRAIN_END, seq_train_length=PREDICTION_DAYS)
 
 data_df = d_r[0]
 data_df = data_df.drop(columns=['date', 'future'])
 
 result_df = d_r[1]
 print("test_data_new")
+
 # print(test_data_new)
 
 # ------------------------------------------------------------------------------
@@ -204,7 +207,7 @@ print(data_df.shape)
 
 # here
 #
-PREDICTION_DAYS = 20  # Number of days to look back
+  # Number of days to look back
 target_column = 'Close'  # The feature you want to predict, e.g., 'Close'
 
 # x_train = []

@@ -61,7 +61,13 @@ def get_data(ticker, feature_columns, start_date, end_date,  seq_train_length, s
         save_data_to_csv(data_df, ticker, start_date, end_date)
     # I need help explaining this step
     # this shifts the close price up by the number steps_to_predict. For example if steps_to_predict is 3, the future column row 1 will contain the close price from column 4.
-    data_df['future'] = data_df['Close'].shift(-steps_to_predict)
+    # data_df['future'] = data_df['Close'].shift(-steps_to_predict)
+
+        # Creating multiple future columns for each step in steps_to_predict
+        for i in range(1, steps_to_predict + 1):
+            data_df[f'future_{i}'] = data_df['Close'].shift(-i)
+        data_df.dropna(inplace=True)  # Drop rows with NaNs created by shifting
+
     # Converts the latest data (of steps_to_predict length) in feature_columns to a numpy array and save to sequence_last_data. We want to get the recent data to predict the future.
     sequence_last_data = np.array(data_df[feature_columns].tail(steps_to_predict))
 
@@ -104,7 +110,7 @@ def get_data(ticker, feature_columns, start_date, end_date,  seq_train_length, s
         target = future_values[index]
         entry_sequences.append(entry)
         if len(entry_sequences) == seq_train_length:
-            data_in_sequence.append([np.array(entry_sequences), future_values[index]])
+            data_in_sequence.append([np.array(entry_sequences), target])
 
     # for entry, target in zip(data_df[feature_columns + ['date']].values, data_df['future'].values):
     #     sequences.append(entry)
