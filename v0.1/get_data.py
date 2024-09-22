@@ -25,7 +25,11 @@ def get_data(ticker, feature_columns, start_date, end_date, seq_train_length,ste
 	# load the data if it is saved already of download using yfinance.
 	# data_df = load_or_download(ticker, start_date, end_date)
 	data_df = yf.download(ticker, start_date, end_date)
-	print(data_df.head())
+	print(data_df.columns)
+	if 'Date' not in data_df.columns:
+		data_df = data_df.reset_index()
+	print("after reset index")
+	print(data_df.columns)
 	# count the missing values in the data. In case there's a high number of missing values, investigate why and how to mitigate the effects
 	missing_values_count = data_df.isna().sum()
 	# print(missing_values_count)
@@ -117,7 +121,7 @@ def get_data(ticker, feature_columns, start_date, end_date, seq_train_length,ste
 		target = future_values[index]
 		entry_sequences.append(entry)
 		if len(entry_sequences) == seq_train_length:
-			# target_date = data_df['date'].values[index + steps_to_predict - 1]
+			# target_date = data_df['Date'].values[index + steps_to_predict - 1]
 			# Adjust the index to get the correct future date
 			data_in_sequence.append([np.array(entry_sequences), target])
 
@@ -126,6 +130,15 @@ def get_data(ticker, feature_columns, start_date, end_date, seq_train_length,ste
 	#     if len(sequences) == seq_train_length:
 	#         data_in_sequence.append([np.array(sequences), target])
 	# sequence_last_data = list([s[:len(feature_columns)] for s in sequences]) + list(sequence_last_data)
+
+
+	sequence_dates = []  # To store the dates corresponding to the sequences
+	for index in range(len(feature_and_date_data)):
+		if index + steps_to_predict - 1 < len(data_df['Date'].values):
+			date = data_df['Date'].values[index + steps_to_predict - 1]
+			sequence_dates.append(date)
+		else:
+			break  # If the index goes out of bounds, exit the loop
 
 	x = []
 	y = []
@@ -158,8 +171,11 @@ def get_data(ticker, feature_columns, start_date, end_date, seq_train_length,ste
 		result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(
 			x, y, test_size=test_size)
 
+		result["test_dates"] = sequence_dates[len(sequence_dates) - len(result["X_test"]):]  # Align dates with test set
+
 		# Assuming the dates_X_test are in the last column of X_test
 		dates_X_test = result["X_test"][:, -1, -1]
+		# print(f"Dates extracted from X_test: {dates_X_test}")
 
 		# Debug prints
 		# print(f"Keys in result: {result.keys()}")
@@ -172,7 +188,9 @@ def get_data(ticker, feature_columns, start_date, end_date, seq_train_length,ste
 		.loc() is used to select rows in data_df where the condition inside prackets is true. In this case, the condition is that the date column is in the dates_X_test list.
 		
 		"""
+
 		result["test_df"] = result["data_df"].loc[result["data_df"]['date'].isin(dates_X_test)]
+
 
 		"""
 		In short the above line get the data from the original data frame that corresponds to the dates in the test set.

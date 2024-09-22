@@ -140,34 +140,39 @@ predicted_close_prices = np.array(predicted_close_prices)
 actual_close_prices = np.array(actual_close_prices)
 
 # Calculate the absolute differences
-differences = np.abs(predicted_close_prices - actual_close_prices)
+differences_actual = np.abs(predicted_close_prices - actual_close_prices)
 
 # Calculate the average difference
-average_difference_actual = np.mean(differences)
+total_average_difference_actual = np.mean(differences_actual)
 
-percentage_difference_actual = (differences / actual_close_prices) * 100
-average_percentage_difference_actual = np.mean(percentage_difference_actual)
-print(f"Average Percentage Difference actual: {average_percentage_difference_actual}%")
+percentage_difference_actual = (differences_actual / actual_close_prices) * 100
+total_average_percentage_difference_actual = np.mean(percentage_difference_actual)
+# print(f"Average Percentage Difference actual: {total_average_percentage_difference_actual}%")
 
 
 from tabulate import tabulate
 # Print the predicted, actual, and difference values in a formatted table
-dates = result_df['test_df']['date'].values
+test_dates = result_df["test_dates"]
+
 
 table_data = []
-
+import pandas as pd
 # Iterate through each prediction step and store the results in a list
 for i in range(len(predicted_close_prices)):
     for j in range(len(predicted_close_prices[i])):
         predicted = round(float(predicted_close_prices[i][j][0]), 3)
         actual = round(float(actual_close_prices[i][j][0]), 3)
-        difference = round(float(differences[i][j][0]), 3)
-        prediction_date = dates[j]  # Get the corresponding date from the test data
+        difference = round(float(differences_actual[i][j][0]), 3)
+        prediction_date =  pd.to_datetime(test_dates[j]) + pd.Timedelta(days=i)
+        prediction_date = prediction_date.strftime('%Y-%m-%d')
+        # Get the corresponding date from the test data
 
         table_data.append([i + 1, f'Sample {j + 1}', prediction_date, predicted, actual, difference])
 
 # Define headers for the table
 headers = ["Step", "Date","Predicted 'Close' Price", "Actual 'Close' Price", "Difference"]
+
+# Calculate the absolute differences and percentage differences for each time step
 
 # Print the table using tabulate
 print("Table made here")
@@ -230,21 +235,13 @@ actual_close_prices_real = np.array(actual_close_prices_real)
 # Calculate the absolute differences
 differences_real = np.abs(predicted_close_prices_real - actual_close_prices_real)
 
-# Calculate the average difference
-average_difference_real = np.mean(differences_real)
+# Calculate the averag
+#
+# e difference
 
 
 
-percentage_difference_real = (differences_real / actual_close_prices_real) * 100
-average_percentage_difference_real = np.mean(percentage_difference_real)
 
-
-
-print(f"\nAverage Difference actual: {float(average_difference_actual):.2f}")
-print(f"Average Percentage Difference actual: {float(average_percentage_difference_actual):.2f}%")
-
-print(f"\nAverage Difference real: {float(average_difference_real): .2f}")
-print(f"Average Percentage Difference real: {float(average_percentage_difference_real):.2f}%")
 
 
 # from simulate_trades import simulate_trades
@@ -252,3 +249,77 @@ print(f"Average Percentage Difference real: {float(average_percentage_difference
 #
 # print(f"Final Balance: {final_balance}")
 # print(f"Profit or Loss: {profit_or_loss}")
+
+
+for step in range(STEPS_TO_PREDICT):
+	differences_step = np.abs(predicted_close_prices[step] - actual_close_prices[step])  # Absolute difference
+	percentage_differences_step = (differences_step / actual_close_prices[step]) * 100  # Percentage difference
+
+	# Calculate the averages
+	average_difference = np.mean(differences_step)
+	average_percentage_difference = np.mean(percentage_differences_step)
+
+	# Print the results for each time step
+	print(f"actual Time Step {step + 1}:")
+	print(f" actual Average Difference: {average_difference:.2f}")
+	print(f"actual Average Percentage Difference: {average_percentage_difference:.2f}%")
+	print("-" * 50)
+
+
+
+
+for step in range(STEPS_TO_PREDICT):
+	differences_step_real = np.abs(predicted_close_prices_real[step] - actual_close_prices_real[step])  # Absolute difference
+	percentage_differences_step_real = (differences_step_real / actual_close_prices_real[step]) * 100  # Percentage difference
+
+	# Calculate the averages
+	average_difference_real = np.mean(differences_step_real)
+	average_percentage_difference_real = np.mean(percentage_differences_step_real)
+
+	# Print the results for each time step
+	print(f"real Time Step {step + 1}:")
+	print(f"real Average Difference: {average_difference_real:.2f}")
+	print(f"real   Average Percentage Difference: {average_percentage_difference_real:.2f}%")
+	print("-" * 50)
+
+
+
+total_average_difference_real = np.mean(differences_real)
+
+
+
+total_percentage_difference_real = (differences_real / actual_close_prices_real) * 100
+
+total_average_percentage_difference_real = np.mean(total_percentage_difference_real)
+
+
+
+
+print(f"\n total Average Difference actual: {float(total_average_difference_actual):.2f}")
+print(f" total Average Percentage Difference actual: {float(total_average_percentage_difference_actual):.2f}%")
+
+print(f"\ntotal Average Difference real: {float(total_average_difference_real): .2f}")
+print(f"total Average Percentage Difference real: {float(total_average_percentage_difference_real):.2f}%")
+
+
+
+
+test_dates_real = result_df_real["test_dates"]
+
+print("real table made here")
+table_data_real = []
+import pandas as pd
+# Iterate through each prediction step and store the results in a list
+for i in range(len(predicted_close_prices_real)):
+    for j in range(len(predicted_close_prices_real[i])):
+        predicted_real = round(float(predicted_close_prices_real[i][j][0]), 3)
+        actual_real = round(float(actual_close_prices_real[i][j][0]), 3)
+        difference_real = round(float(differences_real[i][j][0]), 3)
+        prediction_date_real =  pd.to_datetime(test_dates_real[j]) + pd.Timedelta(days=i)
+        prediction_date_real = prediction_date_real.strftime('%Y-%m-%d')
+        # Get the corresponding date from the test data
+
+        table_data_real.append([i + 1, f'Sample {j + 1}', prediction_date_real, predicted_real, actual_real, difference_real])
+
+# Define headers for the table
+headers = ["Step_real", "Date_real","Predicted_real 'Close_real' Price_real", "Actual_real 'Close_real' Price_real", "Difference_real"]
