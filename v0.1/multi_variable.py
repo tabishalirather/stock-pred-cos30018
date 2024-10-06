@@ -22,18 +22,18 @@ PREDICTION_DAYS = 12
 # target_column = 'Close'  # We are predicting the 'Close' price
 # for mutlistep prediciton, we are predicting the future price num_steps_ahead days ahead
 target_column = 'future'
-STEPS_TO_PREDICT = 5
+STEPS_TO_PREDICT = 1
 
 # Load the stock data using your custom `get_data` function
 d_r = get_data(
-	COMPANY,
-	feature_columns,
-	save_data=True,
-	split_by_date=False,
-	start_date=TRAIN_START,
-	end_date=TRAIN_END,
-	seq_train_length=PREDICTION_DAYS,
-	steps_to_predict=STEPS_TO_PREDICT
+    COMPANY,
+    feature_columns,
+    save_data=True,
+    split_by_date=False,
+    start_date=TRAIN_START,
+    end_date=TRAIN_END,
+    seq_train_length=PREDICTION_DAYS,
+    steps_to_predict=STEPS_TO_PREDICT
 )
 data_df = d_r[0]
 # print("data_df.head():", data_df.head())
@@ -72,7 +72,7 @@ activation = "linear"
 loss = "mean_squared_error"
 optimizer = "RMSprop"
 metrics = "mean_squared_error"
-STEPS_TO_PREDICT = 5
+# STEPS_TO_PREDICT = 1
 
 import os
 
@@ -81,30 +81,30 @@ model_name = f"{layer_name.__name__}_layers{num_layers}_units{units_per_layer}_s
 model_path = f"models/{model_name}.keras"
 
 if os.path.exists(model_path):
-	print(f"Loading existing model from {model_path}")
-	model = tf.keras.models.load_model(model_path)
+    print(f"Loading existing model from {model_path}")
+    model = tf.keras.models.load_model(model_path)
 
 else:
-	print("model DNE, creating a new one.")
-	model = create_model(
-		num_layers=num_layers,
-		units_per_layer=units_per_layer,
-		layer_name=layer_name,
-		num_time_steps=num_time_steps,
-		number_of_features=number_of_features,
-		activation=activation,
-		loss=loss,
-		optimizer=optimizer,
-		metrics=metrics,
-		steps_to_predict=STEPS_TO_PREDICT
-	)
+    print("model DNE, creating a new one.")
+    model = create_model(
+        num_layers=num_layers,
+        units_per_layer=units_per_layer,
+        layer_name=layer_name,
+        num_time_steps=num_time_steps,
+        number_of_features=number_of_features,
+        activation=activation,
+        loss=loss,
+        optimizer=optimizer,
+        metrics=metrics,
+        steps_to_predict=STEPS_TO_PREDICT
+    )
 
-	# print("x_train shape:", X_train)
-	# Train the model
-	model.fit(X_train, y_train, epochs=50, batch_size=30)
+    # print("x_train shape:", X_train)
+    # Train the model
+    model.fit(X_train, y_train, epochs=50, batch_size=30)
 
-	# Save the model for future use
-	model.save(model_path)
+    # Save the model for future use
+    model.save(model_path)
 
 # Load the saved model
 saved_model = tf.keras.models.load_model(model_path)
@@ -127,8 +127,9 @@ for i in range(steps_to_predict):
 
 # Extract the actual 'Close' prices from y_test (these are the actual values to compare with)
 actual_close_prices = []
-
+# steps_to_predict = STEPS_TO_PREDICT
 for i in range(steps_to_predict):
+    print(f"i is {i} in line 132")
     actual = y_test[:, i].reshape(-1, 1)
     actual_inv = column_scaler['Close'].inverse_transform(actual)
     actual_close_prices.append(actual_inv)
@@ -158,8 +159,8 @@ test_dates = result_df["test_dates"]
 table_data = []
 import pandas as pd
 # Iterate through each prediction step and store the results in a list
-for i in range(len(predicted_close_prices)):
-    for j in range(len(predicted_close_prices[i])):
+for i in range(len(predicted_close_prices[:steps_to_predict])):
+    for j in range(len(predicted_close_prices[i][:steps_to_predict])):
         predicted = round(float(predicted_close_prices[i][j][0]), 3)
         actual = round(float(actual_close_prices[i][j][0]), 3)
         difference = round(float(differences_actual[i][j][0]), 3)
@@ -210,20 +211,20 @@ print(f"Predicted prices real shape: {predicted_prices_real.shape}")
 
 predicted_close_prices_real = []
 for i in range(steps_to_predict):
-	# Extract predictions for the i-th future step
-	preds_real = predicted_prices_real[:, i].reshape(-1, 1)
-	# Inverse transform
-	preds_inv_real = column_scaler['Close'].inverse_transform(preds_real)
-	predicted_close_prices_real.append(preds_inv_real)
+    # Extract predictions for the i-th future step
+    preds_real = predicted_prices_real[:, i].reshape(-1, 1)
+    # Inverse transform
+    preds_inv_real = column_scaler['Close'].inverse_transform(preds_real)
+    predicted_close_prices_real.append(preds_inv_real)
 
 # predicted_close_prices_real = column_scaler['Close'].inverse_transform(predicted_prices_real)
 
 # Extract the actual 'Close' prices from y_test (these are the actual values to compare with)
 actual_close_prices_real = []
 for j in range(steps_to_predict):
-	actual_real = real_test_y[:, j].reshape(-1, 1)
-	actual_inv_real = column_scaler['Close'].inverse_transform(actual_real)
-	actual_close_prices_real.append(actual_inv_real)
+    actual_real = real_test_y[:, j].reshape(-1, 1)
+    actual_inv_real = column_scaler['Close'].inverse_transform(actual_real)
+    actual_close_prices_real.append(actual_inv_real)
 
 
 # Optionally, you can print or plot the comparison
@@ -252,35 +253,35 @@ differences_real = np.abs(predicted_close_prices_real - actual_close_prices_real
 
 
 for step in range(STEPS_TO_PREDICT):
-	differences_step = np.abs(predicted_close_prices[step] - actual_close_prices[step])  # Absolute difference
-	percentage_differences_step = (differences_step / actual_close_prices[step]) * 100  # Percentage difference
+    differences_step = np.abs(predicted_close_prices[step] - actual_close_prices[step])  # Absolute difference
+    percentage_differences_step = (differences_step / actual_close_prices[step]) * 100  # Percentage difference
 
-	# Calculate the averages
-	average_difference = np.mean(differences_step)
-	average_percentage_difference = np.mean(percentage_differences_step)
+    # Calculate the averages
+    average_difference = np.mean(differences_step)
+    average_percentage_difference = np.mean(percentage_differences_step)
 
-	# Print the results for each time step
-	print(f"actual Time Step {step + 1}:")
-	print(f" actual Average Difference: {average_difference:.2f}")
-	print(f"actual Average Percentage Difference: {average_percentage_difference:.2f}%")
-	print("-" * 50)
+    # Print the results for each time step
+    print(f"actual Time Step {step + 1}:")
+    print(f" actual Average Difference: {average_difference:.2f}")
+    print(f"actual Average Percentage Difference: {average_percentage_difference:.2f}%")
+    print("-" * 50)
 
 
 
 
 for step in range(STEPS_TO_PREDICT):
-	differences_step_real = np.abs(predicted_close_prices_real[step] - actual_close_prices_real[step])  # Absolute difference
-	percentage_differences_step_real = (differences_step_real / actual_close_prices_real[step]) * 100  # Percentage difference
+    differences_step_real = np.abs(predicted_close_prices_real[step] - actual_close_prices_real[step])  # Absolute difference
+    percentage_differences_step_real = (differences_step_real / actual_close_prices_real[step]) * 100  # Percentage difference
 
-	# Calculate the averages
-	average_difference_real = np.mean(differences_step_real)
-	average_percentage_difference_real = np.mean(percentage_differences_step_real)
+    # Calculate the averages
+    average_difference_real = np.mean(differences_step_real)
+    average_percentage_difference_real = np.mean(percentage_differences_step_real)
 
-	# Print the results for each time step
-	print(f"real Time Step {step + 1}:")
-	print(f"real Average Difference: {average_difference_real:.2f}")
-	print(f"real   Average Percentage Difference: {average_percentage_difference_real:.2f}%")
-	print("-" * 50)
+    # Print the results for each time step
+    print(f"real Time Step {step + 1}:")
+    print(f"real Average Difference: {average_difference_real:.2f}")
+    print(f"real   Average Percentage Difference: {average_percentage_difference_real:.2f}%")
+    print("-" * 50)
 
 
 
