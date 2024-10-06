@@ -22,7 +22,7 @@ PREDICTION_DAYS = 12
 # target_column = 'Close'  # We are predicting the 'Close' price
 # for mutlistep prediciton, we are predicting the future price num_steps_ahead days ahead
 target_column = 'future'
-STEPS_TO_PREDICT = 1
+STEPS_TO_PREDICT = 2
 
 # Load the stock data using your custom `get_data` function
 d_r = get_data(
@@ -324,3 +324,30 @@ for i in range(len(predicted_close_prices_real)):
 
 # Define headers for the table
 headers = ["Step_real", "Date_real","Predicted_real 'Close_real' Price_real", "Actual_real 'Close_real' Price_real", "Difference_real"]
+
+
+
+# for now, let's make the ensemble here:
+from forecasting import random_forest, sarima_forecast, exponential_smoothing_forecast, return_final_forecast
+
+final_forecast = return_final_forecast()
+# print(final_forecast)
+
+# Assuming final_forecast already has a Date index or forecast dates
+forecast_index = final_forecast.index  # Extract index (forecast dates)
+predicted_close_prices = np.array(predicted_close_prices).reshape(-1)[:PREDICTION_DAYS]
+
+# Ensure LSTM predicted values are a DataFrame with the same index
+lstm_predictions_df = pd.DataFrame(
+    np.array(predicted_close_prices).reshape(-1),  # Flatten the predictions
+    index=forecast_index,  # Align with the forecast dates
+    columns=["lstm_forecast"]  # Name of the new column for LSTM predictions
+)
+
+# Concatenate the LSTM predictions with the final forecast
+final_final_forecast = pd.concat([final_forecast, lstm_predictions_df], axis=1)
+
+# Print the updated forecast DataFrame with LSTM predictions included
+pd.set_option('display.max_columns', None)
+
+print(final_final_forecast)
