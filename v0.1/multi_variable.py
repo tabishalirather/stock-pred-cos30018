@@ -1,3 +1,5 @@
+# this is the soln to multi step, multi variable problem
+#if something is broken, it is most likely because of adding [:PREDICTION_DAYS] to the predictions
 import numpy as np
 import tensorflow as tf
 from Tools.demo.sortvisu import steps
@@ -22,7 +24,7 @@ PREDICTION_DAYS = 12
 # target_column = 'Close'  # We are predicting the 'Close' price
 # for mutlistep prediciton, we are predicting the future price num_steps_ahead days ahead
 target_column = 'future'
-STEPS_TO_PREDICT = 5
+STEPS_TO_PREDICT = 2
 
 # Load the stock data using your custom `get_data` function
 d_r = get_data(
@@ -68,16 +70,16 @@ units_per_layer = 100
 layer_name = LSTM
 num_time_steps = PREDICTION_DAYS
 number_of_features = len(feature_columns)
-activation = "linear"
+activation = "tanh"
 loss = "mean_squared_error"
 optimizer = "RMSprop"
 metrics = "mean_squared_error"
-STEPS_TO_PREDICT = 5
+steps_to_predict = STEPS_TO_PREDICT
 
 import os
 
 # Create and train the model using the defined variables
-model_name = f"{layer_name.__name__}_layers{num_layers}_units{units_per_layer}_steps{num_time_steps}_features{number_of_features}_activation{activation}_loss{loss}_optimizer{optimizer}_metrics{metrics}_train{TRAIN_END}_to_{TRAIN_START}_predict{STEPS_TO_PREDICT}"
+model_name = f"{layer_name.__name__}_layers{num_layers}_units{units_per_layer}_steps{num_time_steps}_features{number_of_features}_activation{activation}_loss{loss}_optimizer{optimizer}_metrics{metrics}_train{TRAIN_END}_to_{TRAIN_START}_predict{steps_to_predict}"
 model_path = f"models/{model_name}.keras"
 
 if os.path.exists(model_path):
@@ -209,7 +211,11 @@ print(f"Predicted prices real shape: {predicted_prices_real.shape}")
 
 
 predicted_close_prices_real = []
+steps_to_predict = STEPS_TO_PREDICT
 for i in range(steps_to_predict):
+	print("In steps to predict")
+	print("i:", i)
+
 	# Extract predictions for the i-th future step
 	preds_real = predicted_prices_real[:, i].reshape(-1, 1)
 	# Inverse transform
@@ -220,6 +226,7 @@ for i in range(steps_to_predict):
 
 # Extract the actual 'Close' prices from y_test (these are the actual values to compare with)
 actual_close_prices_real = []
+steps_to_predict = STEPS_TO_PREDICT
 for j in range(steps_to_predict):
 	actual_real = real_test_y[:, j].reshape(-1, 1)
 	actual_inv_real = column_scaler['Close'].inverse_transform(actual_real)
@@ -250,7 +257,7 @@ differences_real = np.abs(predicted_close_prices_real - actual_close_prices_real
 # print(f"Final Balance: {final_balance}")
 # print(f"Profit or Loss: {profit_or_loss}")
 
-
+# steps = STEPS_TO_PREDICT
 for step in range(STEPS_TO_PREDICT):
 	differences_step = np.abs(predicted_close_prices[step] - actual_close_prices[step])  # Absolute difference
 	percentage_differences_step = (differences_step / actual_close_prices[step]) * 100  # Percentage difference
@@ -267,8 +274,8 @@ for step in range(STEPS_TO_PREDICT):
 
 
 
-
-for step in range(STEPS_TO_PREDICT):
+steps_to_predict = STEPS_TO_PREDICT
+for step in range(steps_to_predict):
 	differences_step_real = np.abs(predicted_close_prices_real[step] - actual_close_prices_real[step])  # Absolute difference
 	percentage_differences_step_real = (differences_step_real / actual_close_prices_real[step]) * 100  # Percentage difference
 
