@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from Tools.demo.sortvisu import steps
+from save_metrics import save_metrics
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
@@ -22,7 +23,7 @@ PREDICTION_DAYS = 12
 # target_column = 'Close'  # We are predicting the 'Close' price
 # for mutlistep prediciton, we are predicting the future price num_steps_ahead days ahead
 target_column = 'future'
-STEPS_TO_PREDICT = 2
+STEPS_TO_PREDICT = 10
 
 # Load the stock data using your custom `get_data` function
 d_r = get_data(
@@ -63,12 +64,12 @@ print(f"y_train shape: {y_train.shape}")  # (samples,)
 # -------------------------------------------------------------------------------
 
 # Define variables for model parameters
-num_layers = 5
-units_per_layer = 100
+num_layers = 2
+units_per_layer = 10
 layer_name = LSTM
 num_time_steps = PREDICTION_DAYS
 number_of_features = len(feature_columns)
-activation = "linear"
+activation = "tanh"
 loss = "mean_squared_error"
 optimizer = "RMSprop"
 metrics = "mean_squared_error"
@@ -98,7 +99,6 @@ else:
         metrics=metrics,
         steps_to_predict=STEPS_TO_PREDICT
     )
-
     # print("x_train shape:", X_train)
     # Train the model
     model.fit(X_train, y_train, epochs=50, batch_size=30)
@@ -106,6 +106,12 @@ else:
     # Save the model for future use
     model.save(model_path)
 
+
+model_name = f"{layer_name.__name__}_layers{num_layers}_units{units_per_layer}_steps{num_time_steps}_features{number_of_features}_activation{activation}_loss{loss}_optimizer{optimizer}_metrics{metrics}_train{TRAIN_END}_to_{TRAIN_START}_predict{STEPS_TO_PREDICT}"
+
+# Evaluate the model and save errors to file
+print("Before save metrics")
+save_metrics(model, X_train, y_train, x_test, y_test, model_name)
 # Load the saved model
 saved_model = tf.keras.models.load_model(model_path)
 
@@ -326,16 +332,52 @@ for i in range(len(predicted_close_prices_real)):
 headers = ["Step_real", "Date_real","Predicted_real 'Close_real' Price_real", "Actual_real 'Close_real' Price_real", "Difference_real"]
 
 
+differences = np.abs(predicted_close_prices - actual_close_prices)
+
+# Calculate average differences for each step and flatten to 1D
+average_differences = np.mean(differences, axis=1).flatten()
+
+# Calculate percentage differences for each step
+percentage_differences = (differences / actual_close_prices) * 100
+
+# Calculate average percentage differences for each step and flatten to 1D
+average_percentage_differences = np.mean(percentage_differences, axis=1).flatten()
+
+# Convert to Python lists (if needed)
+average_differences = average_differences.tolist()
+average_percentage_differences = average_percentage_differences.tolist()
+
+
+from visualisations import (
+    plot_predicted_vs_actual, plot_average_differences,
+    display_prediction_table, plot_heatmap, display_summary_table
+)
+
+
+# Call the functions as needed
+# plot_predicted_vs_actual(predicted_close_prices, actual_close_prices, STEPS_TO_PREDICT)
+# plot_average_differences(average_differences, STEPS_TO_PREDICT, diff_type="absolute")
+# plot_average_differences(average_percentage_differences, STEPS_TO_PREDICT, diff_type="percentage")
+# display_prediction_table(predicted_close_prices, actual_close_prices, differences_actual, test_dates, STEPS_TO_PREDICT)
+# plot_heatmap(differences_actual, STEPS_TO_PREDICT)
+# display_summary_table(total_average_difference_actual, total_average_percentage_difference_actual)
+
+
+
+
+
+
 
 # for now, let's make the ensemble here:
-from forecasting import random_forest, sarima_forecast, exponential_smoothing_forecast, return_final_forecast
-
+# from forecasting import random_forest, sarima_forecast, exponential_smoothing_forecast, return_final_forecast
+'''
 final_forecast = return_final_forecast()
 # print(final_forecast)
 
 # Assuming final_forecast already has a Date index or forecast dates
 forecast_index = final_forecast.index  # Extract index (forecast dates)
 predicted_close_prices = np.array(predicted_close_prices).reshape(-1)[:PREDICTION_DAYS]
+actual_close_prices = np.array(actual_close_prices).reshape(-1)[:PREDICTION_DAYS]
 
 # Ensure LSTM predicted values are a DataFrame with the same index
 lstm_predictions_df = pd.DataFrame(
@@ -343,11 +385,48 @@ lstm_predictions_df = pd.DataFrame(
     index=forecast_index,  # Align with the forecast dates
     columns=["lstm_forecast"]  # Name of the new column for LSTM predictions
 )
+actual_values_df = pd.DataFrame(
+    np.array(actual_close_prices).reshape(-1),  # Flatten the predictions
+    index=forecast_index,  # Align with the forecast dates
+    columns=["actual_values"]  # Name of the new column for LSTM predictions
+)
 
 # Concatenate the LSTM predictions with the final forecast
-final_final_forecast = pd.concat([final_forecast, lstm_predictions_df], axis=1)
-
+final_final_forecast = pd.concat([final_forecast, lstm_predictions_df, actual_values_df], axis=1)
 # Print the updated forecast DataFrame with LSTM predictions included
 pd.set_option('display.max_columns', None)
-
 print(final_final_forecast)
+
+
+import matplotlib.pyplot as plt
+
+# Assuming `actual_values` is a DataFrame with the same index as `final_final_forecast`
+# and contains the actual values for the forecast dates
+# actual_values = actual
+# actual_values = pd.DataFrame(actual_close_prices_real.reshape(-1), index=forecast_index, columns=["Actual Values"])
+
+# Concatenate the actual values with the final forecast
+# final_final_forecast_with_actuals = pd.concat([final_final_forecast, actual_values], axis=1)
+
+# Calculate the ensemble value
+ensemble_value = final_final_forecast.mean(axis=1)
+
+# Plot the final_final_forecast DataFrame with actual values
+plt.figure(figsize=(14, 7))
+for column in final_final_forecast.columns:
+    plt.plot(final_final_forecast.index, final_final_forecast[column], label=column)
+
+# Plot the ensemble value
+plt.plot(final_final_forecast.index, ensemble_value, label='Ensemble Value', color='black', linestyle='--', linewidth=2)
+
+# Add title and labels
+plt.title('Final Forecast with Ensemble and Actual Values')
+plt.xlabel('Date')
+plt.ylabel('Forecast Values')
+
+# Add legend
+plt.legend()
+
+# Show the plot
+plt.show()
+'''
