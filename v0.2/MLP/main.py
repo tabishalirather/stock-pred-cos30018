@@ -22,16 +22,18 @@ from save_metrics import save_metrics
 # Custom modules
 from get_data import get_data  # Your function to download/process data
 from create_model import create_model  # Your function to create an LSTM model
+from get_commons import *
 
-# ------------------------- Global Parameters -------------------------
-COMPANY = 'CBA.AX'
-TRAIN_START = '2020-01-01'
-TRAIN_END = '2023-08-01'
-# Feature columns for training (make sure these match what you want to forecast)
+# -------------------------------------------------------------- Data Configuration -------------------------
+COMPANY = config.get("COMPANY")
+TRAIN_START = config.get("TRAIN_START")
+TRAIN_END = config.get("TRAIN_END")
+PREDICTION_DAYS = int(config.get("PREDICTION_DAYS"))  # Number of days to look back for each prediction input
+# STEPS_TO_PREDICT = int(config.get("STEPS_TO_PREDICT"))
+STEPS_TO_PREDICT = 100
+TARGET_COLUMN = config.get("TARGET_COLUMN")
 FEATURE_COLUMNS = ['Open', 'High', 'Low', 'Close', 'Volume']
-PREDICTION_DAYS = 20  # Number of days to look back for each prediction input
-STEPS_TO_PREDICT = 1  # How many future steps to predict; using 'future' as target
-TARGET_COLUMN = 'future'
+
 
 # Model parameters
 NUM_LAYERS = 4

@@ -12,7 +12,7 @@ default_end_date = dt.datetime.now().strftime('%Y-%m-%d')
 default_start_date = (dt.datetime.now() - dt.timedelta(days=5 * 365)).strftime('%Y-%m-%d')
 
 
-def get_data(ticker, feature_columns, start_date, end_date, seq_train_length, steps_to_predict,
+def get_data_kan(ticker, feature_columns, start_date, end_date, seq_train_length, steps_to_predict,
              scale=True, test_size=0.2, save_data=False, split_by_date=False):
 	print("I am read_data")
 
@@ -137,14 +137,14 @@ def load_or_download(ticker, start_date, end_date):
 	if os.path.exists(f"data/{filename}.csv"):
 		print("Data file already exists, loading it now....")
 		data_df = pd.read_csv(f"data/{filename}.csv")
-		if data_df.iloc[0]['Close'] == ticker:
-			print("First row contains invalid data, dropping it...")
-			data_df = data_df.iloc[1:]
+		# if data_df.iloc[0]['Close'] == ticker:
+		# 	print("First row contains invalid data, dropping it...")
+		# 	data_df = data_df.iloc[1:]
 		return data_df
 	else:
 		print("Data file does not exist, downloading it now from yfinance....")
 		data_df = yf.download(ticker, start_date, end_date)
-		if data_df.iloc[0]['Close'] == ticker:
-			print("First row contains invalid data, dropping it...")
-			data_df = data_df.iloc[1:]
+		# if data_df.iloc[0]['Close'] == ticker:
+		# 	print("First row contains invalid data, dropping it...")
+		# 	data_df = data_df.iloc[1:]
 		return data_df
