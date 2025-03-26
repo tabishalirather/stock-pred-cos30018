@@ -19,6 +19,11 @@ from tabulate import tabulate
 from tensorflow.keras.layers import LSTM
 from save_metrics import save_metrics
 
+import time
+import uuid
+import json
+from contextlib import contextmanager
+
 # Custom modules
 from get_data import get_data  # Your function to download/process data
 from create_model import create_model  # Your function to create an LSTM model
@@ -49,7 +54,38 @@ METRICS = "mean_squared_error"
 # Model saving folder
 MODEL_DIR = "models"
 
+# ------------------------- Timer Context Manager -------------------------
 
+
+class TimerLogger:
+    def __init__(self):
+        self.timings = {}
+
+    @contextmanager
+    def timer(self, name):
+        start = time.perf_counter()
+        yield
+        elapsed = time.perf_counter() - start
+        print(f"[{name}] Elapsed time: {elapsed:.4f} seconds")
+        self.timings[name] = elapsed
+
+    def save(self, unique_id, file_path="model_times.json"):
+        # Use the provided unique_id (e.g. your model_name) as the identifier.
+        entry = {
+            "id": unique_id,
+            "timings": self.timings
+        }
+        try:
+            with open(file_path, "r") as f:
+                existing_data = json.load(f)
+            if not isinstance(existing_data, list):
+                existing_data = []
+        except FileNotFoundError:
+            existing_data = []
+        existing_data.append(entry)
+        with open(file_path, "w") as f:
+            json.dump(existing_data, f, indent=4)
+        print(f"Timings saved to {file_path}")
 # ------------------------- Data Loading & Preparation -------------------------
 def load_training_data():
 	"""
@@ -231,24 +267,54 @@ def forecast_on_real_data(saved_model, column_scaler):
 
 # ------------------------- Main Function -------------------------
 def main():
-	# Load training data
-	data_df, result_df = load_training_data()
-	# Extract training/test splits and scaler info
+	logger = TimerLogger()
+
+	with logger.timer("Data Loading"):
+		data_df, result_df = load_training_data()
 	X_train = result_df['X_train']
 	y_train = result_df['y_train']
 	x_test = result_df['X_test']
 	y_test = result_df['y_test']
 	column_scaler = result_df['column_scaler']
-	test_dates = result_df.get("test_dates", None)  # Optional: may be present if split_by_date
+	test_dates = result_df.get("test_dates", None)
 
 	print(f"X_train shape: {X_train.shape}")
 	print(f"y_train shape: {y_train.shape}")
 	print(f"y_test shape: {y_test.shape}")
 
-	# Build or load the model
-	model, model_name = build_or_load_model(X_train, y_train)
-	# Evaluate and save model metrics
-	evaluate_model(model, X_train, y_train, x_test, y_test, model_name)
+	with logger.timer("Model Building/Training"):
+		model, model_name = build_or_load_model(X_train, y_train)
+
+	with logger.timer("Evaluation"):
+		evaluate_model(model, X_train, y_train, x_test, y_test, model_name)
+
+	# Save timing results using the model_name as the unique identifier.
+	logger.save(model_name)
+
+
+if __name__ == "__main__":
+	main()
+
+
+# def main():
+# 	# Load training data
+# 	data_df, result_df = load_training_data()
+# 	# Extract training/test splits and scaler info
+# 	X_train = result_df['X_train']
+# 	y_train = result_df['y_train']
+# 	x_test = result_df['X_test']
+# 	y_test = result_df['y_test']
+# 	column_scaler = result_df['column_scaler']
+# 	test_dates = result_df.get("test_dates", None)  # Optional: may be present if split_by_date
+#
+# 	print(f"X_train shape: {X_train.shape}")
+# 	print(f"y_train shape: {y_train.shape}")
+# 	print(f"y_test shape: {y_test.shape}")
+#
+# 	# Build or load the model
+# 	model, model_name = build_or_load_model(X_train, y_train)
+# 	# Evaluate and save model metrics
+# 	evaluate_model(model, X_train, y_train, x_test, y_test, model_name)
 
 	# (Re)load the saved model to simulate a real-world scenario
 	# model_path, _ = get_model_path()

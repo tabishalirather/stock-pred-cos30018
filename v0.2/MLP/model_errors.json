@@ -169,5 +169,41 @@
             "test_mse": 0.012103566899895668,
             "test_rmse": 0.11001621198666889
         }
+    },
+    {
+        "model_name": "LSTM_layers4_units10_steps20_features5_activationtanh_lossmean_squared_error_optimizerRMSprop_metricsmean_squared_error_train2023-08-01_to_2020-01-01_predict100",
+        "errors": {
+            "train_mse": 0.010661248117685318,
+            "train_rmse": 0.10325332012911409,
+            "test_mse": 0.012205398641526699,
+            "test_rmse": 0.11047804597080227
+        }
+    },
+    {
+        "model_name": "LSTM_layers4_units10_steps20_features5_activationtanh_lossmean_squared_error_optimizerRMSprop_metricsmean_squared_error_train2023-08-01_to_2020-01-01_predict100",
+        "errors": {
+            "train_mse": 0.010717088356614113,
+            "train_rmse": 0.10352337106477026,
+            "test_mse": 0.010603334754705429,
+            "test_rmse": 0.10297249513683462
+        }
+    },
+    {
+        "model_name": "LSTM_layers4_units10_steps20_features5_activationtanh_lossmean_squared_error_optimizerRMSprop_metricsmean_squared_error_train2023-08-01_to_2020-01-01_predict100",
+        "errors": {
+            "train_mse": 0.011520040221512318,
+            "train_rmse": 0.10733145029073407,
+            "test_mse": 0.011695217341184616,
+            "test_rmse": 0.10814442815598321
+        }
+    },
+    {
+        "model_name": "LSTM_layers4_units10_steps20_features5_activationtanh_lossmean_squared_error_optimizerRMSprop_metricsmean_squared_error_train2023-08-01_to_2020-01-01_predict100",
+        "errors": {
+            "train_mse": 0.011566614732146263,
+            "train_rmse": 0.10754819725195891,
+            "test_mse": 0.011697504669427872,
+            "test_rmse": 0.10815500297918665
+        }
     }
 ]
