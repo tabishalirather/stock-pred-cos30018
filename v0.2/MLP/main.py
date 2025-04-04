@@ -55,6 +55,7 @@ METRICS = "mean_squared_error"
 MODEL_DIR = "models"
 
 # ------------------------- Timer Context Manager -------------------------
+# Should we include our forecasting into making new forecasts. Let's try either ways.
 
 
 class TimerLogger:

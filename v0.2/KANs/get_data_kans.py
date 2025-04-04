@@ -37,7 +37,7 @@ def get_data_kan(ticker, feature_columns, start_date, end_date, seq_train_length
 		column_scaler = {}
 		for column in feature_columns:
 			scaler = MinMaxScaler()
-			print(f"Scaling column: {column}")
+			# print(f"Scaling column: {column}")
 			vals = data_df[column].values
 			# vals = vals[]
 			# print(f"vals[1::] {vals[1::]}")
@@ -137,14 +137,14 @@ def load_or_download(ticker, start_date, end_date):
 	if os.path.exists(f"data/{filename}.csv"):
 		print("Data file already exists, loading it now....")
 		data_df = pd.read_csv(f"data/{filename}.csv")
-		# if data_df.iloc[0]['Close'] == ticker:
-		# 	print("First row contains invalid data, dropping it...")
-		# 	data_df = data_df.iloc[1:]
+		if data_df.iloc[0]['Close'] == ticker:
+			print("First row contains invalid data, dropping it...")
+			data_df = data_df.iloc[1:]
 		return data_df
 	else:
 		print("Data file does not exist, downloading it now from yfinance....")
 		data_df = yf.download(ticker, start_date, end_date)
-		# if data_df.iloc[0]['Close'] == ticker:
-		# 	print("First row contains invalid data, dropping it...")
-		# 	data_df = data_df.iloc[1:]
+		if data_df.iloc[0]['Close'] == ticker:
+			print("First row contains invalid data, dropping it...")
+			data_df = data_df.iloc[1:]
 		return data_df
