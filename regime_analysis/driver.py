@@ -66,6 +66,22 @@ CONFIG_CHECK = {1: "10u-tanh", 2: "100u-linear"}
 # paper). "divisor" gives the hidden width as floor(n_train / divisor).
 # Note configs 2 and 5 share an identical specification in the published
 # table; both rows are re-run so the table can keep its shape.
+# The nine LSTM architectures of Table 4, re-run under the walk-forward
+# protocol at the 1-day horizon. (4, 100, linear) coincides with the
+# "100u-linear" configuration of the main grid, whose runs are reused.
+LSTM_GRID_HORIZON = 1
+LSTM_GRID = {
+    "L4-100-linear": {"layers": 4, "units": 100, "activation": "linear"},
+    "L5-100-linear": {"layers": 5, "units": 100, "activation": "linear"},
+    "L6-100-linear": {"layers": 6, "units": 100, "activation": "linear"},
+    "L6-50-linear": {"layers": 6, "units": 50, "activation": "linear"},
+    "L6-20-linear": {"layers": 6, "units": 20, "activation": "linear"},
+    "L6-20-tanh": {"layers": 6, "units": 20, "activation": "tanh"},
+    "L3-20-tanh": {"layers": 3, "units": 20, "activation": "tanh"},
+    "L2-20-tanh": {"layers": 2, "units": 20, "activation": "tanh"},
+    "L2-10-tanh": {"layers": 2, "units": 10, "activation": "tanh"},
+}
+
 KAN_GRID_HORIZON = 1
 KAN_GRID = {
     "C1": {"grid": 3, "k": 6, "divisor": 10},
@@ -105,6 +121,28 @@ def kan_grid_job_list():
     return jobs
 
 
+def lstm_grid_job_list():
+    """Table 4 re-run. L4-100-linear reuses the main grid's 100u-linear runs."""
+    jobs = []
+    for name in LSTM_GRID:
+        if name == "L4-100-linear":
+            continue  # covered by lstm__100u-linear__h1 in the main grid
+        for seed in SEEDS:
+            for fold in range(rl.N_FOLDS):
+                jobs.append(("lstmcfg", name, LSTM_GRID_HORIZON, seed, fold))
+    return jobs
+
+
+def best_check_job_list():
+    """The best config from the new screening, at the remaining horizons."""
+    jobs = []
+    for horizon in (2, 100, 200):
+        for seed in SEEDS:
+            for fold in range(rl.N_FOLDS):
+                jobs.append(("lstmcfg", "L2-20-tanh", horizon, seed, fold))
+    return jobs
+
+
 def estimate_seconds(job):
     """Rough cost model so a run can stop before it overshoots its time budget."""
     model, config, horizon, _, _ = job
@@ -112,6 +150,9 @@ def estimate_seconds(job):
         return 0.5
     if model == "kancfg":
         return 6.0
+    if model == "lstmcfg":
+        spec = LSTM_GRID[config]
+        return 4.0 + 0.09 * spec["units"] * spec["layers"]
     if model == "kan":
         return {1: 4.0, 2: 4.0, 100: 8.0, 200: 14.0}[horizon]
     if config == "100u-linear":
@@ -130,6 +171,8 @@ def job_path(job):
         directory = PRED_DIR + "_pykan"
     if job[0] == "kancfg":
         directory = PRED_DIR + "_kangrid"
+    if job[0] == "lstmcfg":
+        directory = PRED_DIR + "_lstmgrid"
     return os.path.join(directory, job_key(job) + ".npz")
 
 
@@ -168,7 +211,17 @@ def run_job(job, dataframe, cache):
 
     started = time.time()
     train_rmse = None
-    if model_name == "kancfg":
+    if model_name == "lstmcfg":
+        import tensorflow as tf
+
+        spec = LSTM_GRID[config_name]
+        net = build_lstm(spec, x_train.shape[1], x_train.shape[2], horizon,
+                         seed + fold)
+        net.fit(x_train, y_train, epochs=EPOCHS, batch_size=BATCH_SIZE, verbose=0)
+        prediction = net.predict(x_test, verbose=0)
+        train_rmse = rl.rmse(net.predict(x_train, verbose=0), y_train)
+        parameters = net.count_params()
+    elif model_name == "kancfg":
         import torch
 
         from kan import KAN
@@ -280,6 +333,10 @@ def main():
     parser.add_argument("--kan-engine", choices=["custom", "pykan"], default="custom")
     parser.add_argument("--kan-grid", action="store_true",
                         help="run the Table 6 configuration grid (pykan)")
+    parser.add_argument("--lstm-grid", action="store_true",
+                        help="run the Table 4 configuration grid")
+    parser.add_argument("--best-check", action="store_true",
+                        help="run the best screened LSTM config at h=2/100/200")
     args = parser.parse_args()
 
     global KAN_ENGINE
@@ -291,7 +348,11 @@ def main():
         tf.config.threading.set_intra_op_parallelism_threads(args.threads)
         tf.config.threading.set_inter_op_parallelism_threads(args.threads)
 
-    if args.kan_grid:
+    if args.best_check:
+        jobs = best_check_job_list()
+    elif args.lstm_grid:
+        jobs = lstm_grid_job_list()
+    elif args.kan_grid:
         jobs = kan_grid_job_list()
     else:
         jobs = job_list()
