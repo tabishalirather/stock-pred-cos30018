@@ -25,7 +25,22 @@ import regime_lib as rl
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-RESULTS_DIR = os.path.join(HERE, "results")
+
+# Where predictions are written and, just as importantly, where the driver
+# looks to decide what has already been done. The repository ships with a
+# populated results/ directory holding the runs behind the published tables,
+# so anyone re-running this on a fresh clone would find every job already
+# present and produce nothing of their own.
+#
+# To reproduce the experiments independently, point this somewhere empty:
+#
+#     REGIME_RESULTS_DIR=results_mine python driver.py --status
+#
+# and the same for aggregate.py, which reads the variable too. The two
+# directories can then be compared directly.
+RESULTS_DIR = os.environ.get("REGIME_RESULTS_DIR") or os.path.join(HERE, "results")
+if not os.path.isabs(RESULTS_DIR):
+    RESULTS_DIR = os.path.join(HERE, RESULTS_DIR)
 PRED_DIR = os.path.join(RESULTS_DIR, "preds")
 MANIFEST = os.path.join(RESULTS_DIR, "manifest.json")
 

@@ -21,7 +21,13 @@ import numpy as np
 import regime_lib as rl
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-RESULTS_DIR = os.path.join(HERE, "results")
+
+# Honours the same REGIME_RESULTS_DIR override as driver.py, so an independent
+# re-run can be aggregated from its own directory and compared against the
+# shipped one. See the note in driver.py.
+RESULTS_DIR = os.environ.get("REGIME_RESULTS_DIR") or os.path.join(HERE, "results")
+if not os.path.isabs(RESULTS_DIR):
+    RESULTS_DIR = os.path.join(HERE, RESULTS_DIR)
 PRED_DIR = os.path.join(RESULTS_DIR, "preds")
 REGIMES = rl.REGIMES
 HORIZON_LABELS = {1: "1-Day", 2: "2-Day", 100: "100-Day", 200: "200-Day"}
