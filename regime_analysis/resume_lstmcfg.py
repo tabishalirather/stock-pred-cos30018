@@ -117,7 +117,10 @@ def main():
             "thresholds": thresholds,
             "train_seconds": round(elapsed_total, 3),
             "train_rmse": train_rmse,
-            "resumed": True,
+            # True only if training was actually split across invocations.
+            # A run whose 25 epochs fitted into a single call is identical
+            # to an uninterrupted run and is recorded as such.
+            "resumed": bool(elapsed_before > 0.0),
         }),
     )
     for path in (model_path, state_path):

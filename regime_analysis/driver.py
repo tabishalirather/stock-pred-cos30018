@@ -122,11 +122,16 @@ def kan_grid_job_list():
 
 
 def lstm_grid_job_list():
-    """Table 4 re-run. L4-100-linear reuses the main grid's 100u-linear runs."""
+    """Table 4 re-run.
+
+    Every configuration is run through this list, including L4-100-linear.
+    That configuration is architecturally identical to the main grid's
+    "100u-linear" (4 layers, 100 units, linear), but the main grid's job
+    type does not record training error, so running it here is what
+    supplies the train RMSE column for that row of Table 4.
+    """
     jobs = []
     for name in LSTM_GRID:
-        if name == "L4-100-linear":
-            continue  # covered by lstm__100u-linear__h1 in the main grid
         for seed in SEEDS:
             for fold in range(rl.N_FOLDS):
                 jobs.append(("lstmcfg", name, LSTM_GRID_HORIZON, seed, fold))
