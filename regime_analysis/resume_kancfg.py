@@ -17,8 +17,15 @@ that driver.py would have produced.
 """
 
 import argparse
-import json
 import os
+import sys
+
+# Pin hash randomisation before anything else: see the note in driver.py.
+if os.environ.get("PYTHONHASHSEED") != "0":
+    os.environ["PYTHONHASHSEED"] = "0"
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
+import json
 import time
 
 import numpy as np
@@ -45,6 +52,9 @@ def build_job_state(config_name, seed, fold, horizon):
     thresholds = rl.regime_thresholds(volatility[train_slice], efficiency[train_slice])
     labels = rl.assign_regimes(volatility[test_slice], efficiency[test_slice], thresholds)
 
+    # Seed numpy as well as torch: pykan's fit() uses np.random.choice to
+    # permute the training rows each step. See the note in driver.py.
+    np.random.seed(seed + fold)
     torch.manual_seed(seed + fold)
     flat_train = torch.tensor(x_train.reshape(len(x_train), -1), dtype=torch.float32)
     flat_test = torch.tensor(x_test.reshape(len(x_test), -1), dtype=torch.float32)

@@ -16,7 +16,19 @@ as many short invocations as needed and can be resumed after an interruption.
 import argparse
 import json
 import os
+import sys
 import time
+
+# pykan's fit() is sensitive to Python's per-process hash randomisation: it
+# iterates over a hash-ordered collection, so the floating-point summation
+# order, and after a few L-BFGS steps the trained model itself, differs from
+# one interpreter launch to the next even with numpy and torch fully seeded.
+# (Diagnosed by running the same seeded fit in three fresh processes: three
+# different results; with PYTHONHASHSEED pinned: bit-identical.) The variable
+# only takes effect at interpreter startup, so re-exec once if it is unset.
+if os.environ.get("PYTHONHASHSEED") != "0":
+    os.environ["PYTHONHASHSEED"] = "0"
+    os.execv(sys.executable, [sys.executable] + sys.argv)
 
 import numpy as np
 
@@ -247,6 +259,14 @@ def run_job(job, dataframe, cache):
         from kan import KAN
 
         spec = KAN_GRID[config_name]
+        # pykan's fit() permutes the training rows each step with
+        # numpy's GLOBAL generator (np.random.choice), which torch.manual_seed
+        # does not touch. Left unseeded, that permutation changes on every
+        # run; the summation order changes with it, and ten L-BFGS steps
+        # amplify the floating-point drift into visibly different predictions
+        # (found when an independent re-run failed to reproduce per-fold
+        # outputs). Seeding numpy pins the permutation.
+        np.random.seed(seed + fold)
         torch.manual_seed(seed + fold)
         flat_train = torch.tensor(x_train.reshape(len(x_train), -1), dtype=torch.float32)
         flat_test = torch.tensor(x_test.reshape(len(x_test), -1), dtype=torch.float32)
@@ -279,6 +299,14 @@ def run_job(job, dataframe, cache):
 
         from kan import KAN
 
+        # pykan's fit() permutes the training rows each step with
+        # numpy's GLOBAL generator (np.random.choice), which torch.manual_seed
+        # does not touch. Left unseeded, that permutation changes on every
+        # run; the summation order changes with it, and ten L-BFGS steps
+        # amplify the floating-point drift into visibly different predictions
+        # (found when an independent re-run failed to reproduce per-fold
+        # outputs). Seeding numpy pins the permutation.
+        np.random.seed(seed + fold)
         torch.manual_seed(seed + fold)
         flat_train = torch.tensor(x_train.reshape(len(x_train), -1), dtype=torch.float32)
         flat_test = torch.tensor(x_test.reshape(len(x_test), -1), dtype=torch.float32)

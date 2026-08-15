@@ -190,6 +190,50 @@ noise, which is a direct consistency check on the corrected pipeline. Table 6
 and Figure 3 in the Overleaf paper have been regenerated from these numbers
 (the figure is now drawn with pgfplots directly from the data).
 
+## 4c. Reproducibility of the pykan runs (added after independent verification)
+
+Tabish re-ran the 60 pykan jobs on his own machine. His pooled results
+match ours (1-day 0.0400 vs 0.0409, 2-day 0.0470 vs 0.0473; with the
+divergent first fold excluded, 100-day 0.1294 vs 0.1250 and 200-day
+0.1511 vs 0.1516), and he reproduces the fold-0 L-BFGS divergence at both
+long horizons. His per-fold predictions, however, match none of ours
+exactly, with per-window differences up to 1.3 in scaled units on the
+divergent folds.
+
+Chasing that down led somewhere worth recording. In order of discovery:
+
+1. Our scripts seeded torch but never numpy, and pykan's `fit()` permutes
+   the training rows each step through numpy's global generator
+   (`np.random.choice`). Fixed: both RNGs are now seeded per job.
+2. pykan's fit is also sensitive to Python's per-process hash
+   randomisation. The drivers now pin `PYTHONHASHSEED=0`, re-executing
+   themselves once if needed, since the variable only takes effect at
+   interpreter startup.
+3. Even with both fixed, every seed pinned, and every thread pool
+   (torch, OMP, OpenBLAS, MKL) forced to a single thread, the same seeded
+   fit still produces different results in different process launches.
+   The divergence enters in `update_grid`, whose `curve2coef` solves a
+   least-squares system with `torch.linalg.lstsq` on nearly
+   rank-deficient spline collocation matrices. Many coefficient vectors
+   fit almost equally well; which one the solver returns varies from
+   launch to launch, and ten steps of full-batch L-BFGS amplify the
+   difference. This is inside pykan and LAPACK, not our code.
+
+The practical consequences:
+
+- Exact per-file reproduction is the wrong acceptance test for the pykan
+  runs. Statistical agreement is the right one, and the independent run
+  passes it: pooled short-horizon RMSE agrees to about 0.003, and the
+  qualitative findings (KAN competitive at short horizons, fold-0
+  divergence at long horizons) reproduce exactly.
+- The seed-to-seed spreads quoted for KAN understate total run-to-run
+  variability at the 100- and 200-day horizons, where launch-to-launch
+  differences of roughly 0.03 to 0.04 in pooled RMSE sit on top of seed
+  variance. The 1- and 2-day figures are stable to well within the
+  precision quoted in the paper.
+- The LSTM and custom-engine results are unaffected: they reproduce
+  byte-identically under the same protocol.
+
 ## 5. What I would suggest to the team
 
 The cosmetic Table 7 fix can go in immediately. The rest is a bigger
