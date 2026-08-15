@@ -8,18 +8,41 @@ the published numbers do not reproduce.
 
 ## Reproducing
 
+**Read this before running anything.** The repository ships with a populated
+`results/` directory holding the runs behind the paper's tables, and
+`driver.py` skips any job whose output file already exists. On a fresh clone
+that means every job counts as done: the driver writes nothing, and
+`aggregate.py` simply re-derives the shipped tables from the shipped files.
+To produce results of your own, point the pipeline at an empty directory:
+
 ```bash
-python driver.py --status          # show how many of the 150 runs are done
-python driver.py --budget 600      # run jobs until the budget is used up
-python aggregate.py                # pool folds, write table + figure + summary
+REGIME_RESULTS_DIR=results_mine python driver.py --status   # should say: done 0
+REGIME_RESULTS_DIR=results_mine python driver.py --budget 600
+REGIME_RESULTS_DIR=results_mine python aggregate.py
+python provenance.py --dir results_mine --compare results   # whose files are whose
+```
+
+(On Windows, set the variable first: `set REGIME_RESULTS_DIR=results_mine`.)
+Every script that reads or writes results honours the same variable. Without
+it, the scripts operate on the shipped `results/`, which is the right mode for
+regenerating tables and figures from the recorded runs, and the wrong mode for
+independent verification.
+
+`provenance.py` reports whether the files in a results directory came with the
+clone or were written locally, and compares two directories job by job. When
+comparing, expect the LSTM and custom-engine files to match exactly; the pykan
+files will differ per fold even on the same machine, because pykan's grid
+update is not deterministic across process launches (`FINDINGS.md` 4c). Judge
+pykan reproductions on pooled RMSE, not per-file identity.
+
+```bash
 python replicate_published.py      # rerun the ORIGINAL protocol for comparison
 ```
 
 `driver.py` is resumable: it writes one `.npz` per (model, config, horizon, seed,
-fold) into `results/preds/` and skips anything already there, so it can be run in
-short bursts or restarted after an interruption. `--budget` is a wall-clock
-allowance in seconds and `--workers N --worker i` splits the grid across
-processes.
+fold) and skips anything already there, so it can be run in short bursts or
+restarted after an interruption. `--budget` is a wall-clock allowance in
+seconds and `--workers N --worker i` splits the grid across processes.
 
 The grid is 150 runs: naive baseline (4 horizons x 5 folds), KAN
 (4 x 3 seeds x 5 folds), LSTM at its per-horizon configuration

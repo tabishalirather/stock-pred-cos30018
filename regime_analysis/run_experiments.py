@@ -27,7 +27,11 @@ import regime_lib as rl
 
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 
-RESULTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
+_HERE = os.path.dirname(os.path.abspath(__file__))
+# Honour the same REGIME_RESULTS_DIR override as driver.py.
+RESULTS_DIR = os.environ.get("REGIME_RESULTS_DIR") or os.path.join(_HERE, "results")
+if not os.path.isabs(RESULTS_DIR):
+    RESULTS_DIR = os.path.join(_HERE, RESULTS_DIR)
 RESULTS_PATH = os.path.join(RESULTS_DIR, "regime_results.json")
 
 # LSTM configurations exactly as specified in the published paper

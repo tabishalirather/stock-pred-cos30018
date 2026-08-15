@@ -44,8 +44,17 @@ sys.path.insert(0, PARENT)
 
 import driver  # noqa: E402
 
-PRED = os.path.join(PARENT, "results", "preds")
-PRED_PYKAN = os.path.join(PARENT, "results", "preds_pykan")
+def _results_dir(base):
+    """Honour the REGIME_RESULTS_DIR override used by driver.py, so runs
+    written to an independent directory can be plotted the same way."""
+    path = os.environ.get("REGIME_RESULTS_DIR") or os.path.join(base, "results")
+    if not os.path.isabs(path):
+        path = os.path.join(base, path)
+    return path
+
+
+PRED = os.path.join(_results_dir(PARENT), "preds")
+PRED_PYKAN = os.path.join(_results_dir(PARENT), "preds_pykan")
 OUT_DIR = HERE
 
 HORIZONS = [1, 2, 100, 200]

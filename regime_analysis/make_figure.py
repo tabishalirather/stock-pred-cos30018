@@ -87,8 +87,17 @@ COLOUR_NAIVE = "#9a9a9a"
 # ==========================================================================
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PRED_DIR = os.path.join(HERE, "results", "preds")
-PRED_DIR_PYKAN = os.path.join(HERE, "results", "preds_pykan")
+def _results_dir(base):
+    """Honour the REGIME_RESULTS_DIR override used by driver.py, so runs
+    written to an independent directory can be plotted the same way."""
+    path = os.environ.get("REGIME_RESULTS_DIR") or os.path.join(base, "results")
+    if not os.path.isabs(path):
+        path = os.path.join(base, path)
+    return path
+
+
+PRED_DIR = os.path.join(_results_dir(HERE), "preds")
+PRED_DIR_PYKAN = os.path.join(_results_dir(HERE), "preds_pykan")
 
 
 def _fold_number(path):
