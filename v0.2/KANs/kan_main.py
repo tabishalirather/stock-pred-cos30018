@@ -47,6 +47,13 @@ def load_and_prepare_data():
 	scale = True
 	test_size = 0.2
 	save_data = False
+	# NOTE 2026-08-06. split_by_date=False routes to sklearn train_test_split,
+	# which shuffles. Adjacent sequences share 19 of their 20 input days, so
+	# near-duplicate windows land on both sides of the split and the test error
+	# is optimistic. There is also no fixed seed, so results are not
+	# reproducible run to run. The corrected evaluation used for the paper is in
+	# ../../regime_analysis/ (blocked walk-forward validation, fixed seeds).
+	# Left as False here so this script still reproduces the historical runs.
 	split_by_date = False
 
 	# Load data using your custom get_data_kan function
@@ -70,22 +77,35 @@ def load_and_prepare_data():
 	test_dates = result_df["test_dates"]
 	column_scaler = result_df['column_scaler']
 
-	# Limit predictions to the last few days in the test set
-	x_test_subset = x_test[-STEPS_TO_PREDICT:]
-	y_test_subset = y_test[-STEPS_TO_PREDICT:]
-	test_dates_subset = test_dates[-STEPS_TO_PREDICT:]
+	# FIXED 2026-08-06. Previously this kept only the last STEPS_TO_PREDICT rows
+	# of the test set:
+	#     x_test_subset = x_test[-STEPS_TO_PREDICT:]
+	# At the 1-day horizon that is a single sample, while the LSTM script scored
+	# on the whole test set, so the two models were never compared on the same
+	# data. The full test set is now used.
+	x_test_subset = x_test
+	y_test_subset = y_test
+	test_dates_subset = test_dates
 
 	# Reshape data for model input (flatten each sequence)
 	x_train = x_train.reshape(x_train.shape[0], -1)
 	x_test_subset = x_test_subset.reshape(x_test_subset.shape[0], -1)
 
 	# Prepare dataset tensors for PyTorch
+	#
+	# FIXED 2026-08-06. The label tensors previously ended in .unsqueeze(1),
+	# which gave them shape (n, 1, h) against a model output of (n, h).
+	# Broadcasting then compared every prediction against every label rather
+	# than matching each prediction to its own, so the reported loss measured
+	# the spread of the price series instead of forecast error. On this dataset
+	# that inflates the RMSE of an accurate model by roughly a factor of ten.
+	# Labels must stay (n, h) to match the model output.
 	device = get_device()
 	dataset = {
 		'train_input': torch.tensor(x_train).float().to(device),
 		'test_input': torch.tensor(x_test_subset).float().to(device),
-		'train_label': torch.tensor(y_train).float().to(device).unsqueeze(1),
-		'test_label': torch.tensor(y_test_subset).float().to(device).unsqueeze(1)
+		'train_label': torch.tensor(y_train).float().to(device),
+		'test_label': torch.tensor(y_test_subset).float().to(device)
 	}
 	return dataset, test_dates_subset, column_scaler
 
